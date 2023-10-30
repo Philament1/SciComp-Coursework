@@ -23,7 +23,7 @@ def part1(Xin,istar):
                 if x>=X[j]:
                     ind = j+1
                     break                   
-        else:   #  Binary insertion sort
+        else:           #  Binary insertion sort
             a = 0
             b = i-1
             while a <= b:
