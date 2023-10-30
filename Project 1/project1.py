@@ -123,6 +123,7 @@ def part2(S,T,m):
 
     #Add code here for part 2, question 1
 
+    #  Function used from slides
     def char2base4(S):
         """Convert gene test_sequence
         string to list of ints
@@ -137,6 +138,7 @@ def part2(S,T,m):
             L.append(c2b[s])
         return L
 
+    #  Function used from slides
     def heval(L,Base,Prime):
         """Convert list L to base-10 number mod Prime
         where Base specifies the base of L
@@ -152,20 +154,20 @@ def part2(S,T,m):
 
     q = n-l     # Chosen prime
 
-    bm = 4**m % q   # Computed here for efficiency
-
     #  Base length-m hash in S
     hi = heval(X[:m],4,q)
 
     #  Base length-m hash in T
     hp = [heval(Y[:m],4,q)]
 
-    #  Comparison of base T to base S
+    #  Comparison of base length-m hash in T to base length-m hash in S
     ind=0   #  index for S and X
     jnd=0   #  index for T and Y
     if hi==hp[jnd]:
         if X[ind:ind+m] == Y[jnd:jnd+m]:
             L[jnd].append(ind)
+
+    bm = 4**m % q   # Computed here for efficiency
 
     #  Hash for each length-m string in T, and comparison against base length-m hash in S
     for jnd in range(1, l-m+1):
@@ -175,7 +177,7 @@ def part2(S,T,m):
                 L[jnd].append(ind)
         
 
-    #  Rabin Karp algorithm
+    #  Rabin Karp algorithm adapted from slides
     for ind in range(1, n-m+1):
         hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q
         for jnd in range(l-m+1):
