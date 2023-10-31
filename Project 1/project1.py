@@ -33,9 +33,6 @@ def part1(Xin,istar):
                 else:
                     b = c - 1
             ind = a
-        
-        #print(i, ind)
-        #print(X[ind+1:i+1])
 
         X[ind+1:i+1] = X[ind:i]
         X[ind] = x
@@ -52,12 +49,11 @@ def part1_time(inputs=None):
 
     import numpy as np
     import matplotlib.pyplot as plt
+    import time
 
-    def randomlist_timer(N, istar):
+    def randomlist_timer(N, istar, sample_range):
 
-        import time
-
-        input = np.random.randint(0, N-1, size=N)
+        input = np.random.randint(0, sample_range, size=N)
 
         t1 = time.time()
         part1(input, istar)
@@ -67,8 +63,6 @@ def part1_time(inputs=None):
     
     def sortedlist_timer(N, istar, ascending=True):
         
-        import time
-
         if ascending:
             input = list(range(N))
         else:
@@ -79,26 +73,56 @@ def part1_time(inputs=None):
         t2 = time.time()
 
         return t2-t1
+    
+    def noduplicateslist_timer(N, istar):
+
+        input = list(range(N))
+        np.random.shuffle(input)
+
+        t1 = time.time()
+        part1(input, istar)
+        t2 = time.time()
+
+        return t2-t1
         
-    N_list = np.logspace(1, 9, num=9, dtype=int)
+    N_list = np.logspace(10, 10000, size=10, dtype=int)
+    sample_ranges = []
+    istar_vals = ["0", "N//2", "N-1"]
 
-    #times = []
+    mm = len(N_list)
+    nn = len(istar_vals)
 
-    for N in N_list:
-        istars = np.linspace(0, N-1, num=2, dtype=int)
-        for istar in istars:
-            
-            t = randomlist_timer(N, istar)
-            print(N, istar, "random", t)
+    times = np.zeros((mm,nn))
+    times_asc = np.zeros((mm,nn))
+    times_nodup = np.zeros((mm,nn))
+    times_desc = np.zeros((mm,nn))
 
+    for j, N in enumerate(N_list):
+        istars = [0, N//2, N-1]
+        for k, istar in enumerate(istars):
             t1 = sortedlist_timer(N, istar, ascending=True)
             print(N, istar, "ascending", t1)
+            times_asc[j,k] = t1
 
             t2 = sortedlist_timer(N, istar, ascending=False)
             print(N, istar, "descending", t2)
-            
-        #times.append(t)
-        
+            times_desc[j,k] = t2
+
+            t3 = noduplicateslist_timer(N, istar)
+            print(N, istar, "no duplicates", t3)
+            times_nodup[j,k] = t3
+
+            t4 = randomlist_timer(N, istar, N)
+            print(N, istar, "random", t4)
+            times[j,k] = t4
+                
+    fig, ax = plt.subplots(1,1)
+    ax.plot(N_list, times_asc[:,0], label="Ascending")
+    ax.plot(N_list, times_desc[:,0], label="Descending")
+    ax.plot(N_list, times_nodup[:,0], label="No duplicates")
+    ax.plot(N_list, times[:,0], label="Random")
+    ax.legend()
+    plt.show()
 
     return None #Modify if needed
 
