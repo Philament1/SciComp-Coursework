@@ -53,7 +53,7 @@ def part1_time(inputs=None):
     
     def timer(N, istar, sort=False, desc=False):
         """
-        Timer for list of length N from a sample from 0 to 2N
+        Timer for part1 using a list of length N from a sample of integers from 0 to 2N inclusive
         """
         
         input = list(np.random.randint(0, 2*N, size=N))
@@ -81,7 +81,7 @@ def part1_time(inputs=None):
     times_desc = np.zeros((mm,nn))      #   Descending sorted list
     times_random = np.zeros((mm,nn))    #   Random list sampled from 0 to 2*N
 
-    #   Timing each case of N, istar, and input
+    #   Timing each case of N, istar, and input list
     for j, N in enumerate(N_list):
         istars = [0, N//2, N-1]
         for k, istar in enumerate(istars):
@@ -96,10 +96,11 @@ def part1_time(inputs=None):
             t3 = timer(N, istar)
             times_random[j,k] = t3
             print(N, istar_vals[k], "rand", t3)
+
+    #   Plots
                 
     fig, ax = plt.subplots(2,2)
 
-    #   Plots
     ax[0,0].set_title("Time against N for a list in descending order")
     for k in range(nn):
         ax[0,0].plot(N_list, times_desc[:,k], label=istar_vals[k])
@@ -155,7 +156,7 @@ def part2(S,T,m):
 
     #Add code here for part 2, question 1
 
-    #  Function used from slides
+    #  Function used from lecture slides
     def char2base4(S):
         """Convert gene test_sequence
         string to list of ints
@@ -170,7 +171,7 @@ def part2(S,T,m):
             L.append(c2b[s])
         return L
 
-    #  Function used from slides
+    #  Function used from lecture slides
     def heval(L,Base,Prime):
         """Convert list L to base-10 number mod Prime
         where Base specifies the base of L
@@ -190,14 +191,14 @@ def part2(S,T,m):
     hi = heval(X[:m],4,q)
     #  Base length-m hash in T
     hp = heval(Y[:m],4,q)
-    #  Dictionary for all length-m hashes in T, with a list of index locations in T as the value
+    #  Dictionary for all length-m hashes in T, with lists of corresponding index locations in T as the values
     hp_dict = {hp: [0]}
 
     #  Comparison of base length-m hash in T to base length-m hash in S
-    ind=0   #  Index for X
+    ind=0   #  Index for X (S)
     if hi == hp:    #  Base hash comparison
-        jnd = 0     #  Index for Y
-        if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
+        jnd = 0     #  Index for Y (T)
+        if X[ind:ind+m] == Y[jnd:jnd+m]:    #  Character match check
             L[jnd].append(ind)
 
     bm = 4**m % q   # Computed here for efficiency
@@ -205,22 +206,22 @@ def part2(S,T,m):
     #  Rabin Karp rolling hash for each length-m sub-string in T, adding to the dictionary, and comparison against base length-m hash in S
     for jnd in range(1, l-m+1):
         hp = ((4*hp - int(Y[jnd-1])*bm + int(Y[jnd-1+m])) % q)  #  Hash calculation for length-m string in T
-        if hp in hp_dict:   #  Adding index to the dictionary
+        if hp in hp_dict:   #  Adding hash and corresponding index to the dictionary
             hp_dict[hp].append(jnd)
         else:
             hp_dict[hp] = [jnd]
         
         if hi == hp:        #  Comparison against base length-m hash in S
-            if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
+            if X[ind:ind+m] == Y[jnd:jnd+m]:    #  Character match check
                 L[jnd].append(ind)
         
 
-    #  Rabin Karp algorithm adapted from slides
+    #  Rabin Karp algorithm adapted from lecture slides
     for ind in range(1, n-m+1):
         hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q    #  Hash calculation for length-m sub-string in S
         if hi in hp_dict:   #  Checking whether it matches a hash in the T hash dictionary
             for jnd in hp_dict[hi]:     #  For each index in the T hash dictionary value
-                if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
+                if X[ind:ind+m] == Y[jnd:jnd+m]:    #  Character match check
                     L[jnd].append(ind)  #  Append to L
 
     return L
