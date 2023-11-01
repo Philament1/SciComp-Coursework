@@ -51,52 +51,25 @@ def part1_time(inputs=None):
     import matplotlib.pyplot as plt
     import time
     
-    def sortedlist_timer(N, istar, ascending=True):
+    def timer(N, istar, sort=False, desc=False):
         """
-        Timer for a sorted list of length N (can vary istar and ascending/descending)
+        Timer for list of length N from a sample of 0 to 2N
         """
         
-        if ascending:
-            input = list(range(N))
-        else:
-            input = list(range(N-1, -1, -1))
+        input = list(np.random.randint(0, 2*N, size=N))
+
+        if sort:
+            input.sort()
+            if desc:
+                input.reverse()
         
         t1 = time.time()
-        for i in range(10):
+        for i in range(100):
             part1(input, istar)
         t2 = time.time()
 
-        return (t2-t1)/10
-    
-    def noduplicateslist_timer(N, istar):
-        """
-        Timer for a shuffled list with no duplicate integers of length N (can vary istar)
-        """
+        return (t2-t1)/100
 
-        input = list(range(N))
-        np.random.shuffle(input)
-
-        t1 = time.time()
-        for i in range(10):
-            part1(input, istar)
-        t2 = time.time()
-
-        return (t2-t1)/10
-    
-    def randomlist_timer(N, istar, sample_range):
-        """
-        Timer for random list of length N sampled from 0 to sample_range (can vary istar)
-        """
-
-        input = np.random.randint(0, sample_range, size=N)
-
-        t1 = time.time()
-        for i in range(10):
-            part1(input, istar)
-        t2 = time.time()
-
-        return (t2-t1)/10
-    
     N_list = np.logspace(1, 3, num=100, dtype=int)    #   N values
     istar_vals = ["0", "N//2", "N-1"]       #  istar cases
 
@@ -106,73 +79,60 @@ def part1_time(inputs=None):
     #   Timings where each row is a different N value, and columns are different istar cases:
     times_asc = np.zeros((mm,nn))       #   Ascending sorted list
     times_desc = np.zeros((mm,nn))      #   Descending sorted list
-    times_nodup = np.zeros((mm,nn))     #   Random list with no duplicate values
     times_random = np.zeros((mm,nn))    #   Random list sampled from 0 to 2*N
 
     #   Timing each case of N, istar, and input
     for j, N in enumerate(N_list):
         istars = [0, N//2, N-1]
         for k, istar in enumerate(istars):
-            t1 = sortedlist_timer(N, istar, ascending=True)
+            t1 = timer(N, istar, sort=True)
             times_asc[j,k] = t1
             print(N, istar_vals[k], "asc", t1)
 
-            t2 = sortedlist_timer(N, istar, ascending=False)
+            t2 = timer(N, istar, sort=True, desc=True)
             times_desc[j,k] = t2
             print(N, istar_vals[k], "desc", t2)
 
-            t3 = noduplicateslist_timer(N, istar)
-            times_nodup[j,k] = t3
-            print(N, istar_vals[k], "nodup", t3)
-
-
-            t4 = randomlist_timer(N, istar, 2*N)
-            times_random[j,k] = t4
-            print(N, istar_vals[k], "rand", t4)
-
+            t3 = timer(N, istar)
+            times_random[j,k] = t3
+            print(N, istar_vals[k], "rand", t3)
                 
-    fig, ax = plt.subplots(3,2, figsize = (5, 8))
+    fig, ax = plt.subplots(2,2)
 
     #   Plots
-    ax[0,0].set_title("Ascending")
+    ax[0,0].set_title("Time against N for a list in descending order")
     for k in range(nn):
-        ax[0,0].plot(N_list, times_asc[:,k], label=istar_vals[k])
+        ax[0,0].plot(N_list, times_desc[:,k], label=istar_vals[k])
 
-    ax[0,1].set_title("Descending")
+    '''
+    ax[0,1].set_title("Time against N for a random list sampled from 0 to 2N")
     for k in range(nn):
-        ax[0,1].plot(N_list, times_desc[:,k], label=istar_vals[k])
-
-    ax[1,0].set_title("Random No Duplicates")
+        ax[0,1].plot(N_list, times_random[:,k], label=istar_vals[k])
+    '''
+    ax[0,1].set_title("Time against N for a list in ascending order")
     for k in range(nn):
-        ax[1,0].plot(N_list, times_nodup[:,k], label=istar_vals[k])
-
-    ax[1,1].set_title("Random 0 to 2N")
-    for k in range(nn):
-        ax[1,1].plot(N_list, times_random[:,k], label=istar_vals[k])
+        ax[0,1].plot(N_list, times_asc[:,k], label=istar_vals[k])
     
-    for i in range(2):
-        for j in range(2):
-            ax[i,j].legend()
-            ax[i,j].set_xlabel('N')
-            ax[i,j].set_ylabel('Time (s)')
+    for j in range(2):
+        ax[0,j].legend()
+        ax[0,j].set_xlabel('N')
+        ax[0,j].set_ylabel('Time (s)')
     
-    ax[2,0].set_title("istar = 0")
-    ax[2,0].plot([N*np.log(N) for N in N_list], times_asc[:,0], color='c', label="Ascending")
-    ax[2,0].plot([N*np.log(N) for N in N_list], times_desc[:,0], color='m', label="Descending")
-    ax[2,0].plot([N*np.log(N) for N in N_list], times_nodup[:,0], color='y', label="Random No Duplicates")
-    ax[2,0].plot([N*np.log(N) for N in N_list], times_random[:,0], color='k', label="Random 0 to 2N")
-    ax[2,0].legend(fontsize='small')
-    ax[2,0].set_xlabel('NlogN')
-    ax[2,0].set_ylabel('Time (s)')
+    ax[1,0].set_title("Time against NlogN for istar=0")
+    ax[1,0].plot([N*np.log2(N) for N in N_list], times_desc[:,0], color='y', label="Descending")
+    ax[1,0].plot([N*np.log2(N) for N in N_list], times_random[:,0], color='m', label="Random 0 to 2N")
+    ax[1,0].plot([N*np.log2(N) for N in N_list], times_asc[:,0], color='c', label="Ascending")
+    ax[1,0].legend(fontsize='small')
+    ax[1,0].set_xlabel('NlogN')
+    ax[1,0].set_ylabel('Time (s)')
 
-    ax[2,1].set_title("istar = N-1")
-    ax[2,1].plot([N**2 for N in N_list], times_asc[:,2], color='c', label="Ascending")
-    ax[2,1].plot([N**2 for N in N_list], times_desc[:,2], color='y', label="Descending")
-    ax[2,1].plot([N**2 for N in N_list], times_nodup[:,2], color='m', label="Random No Duplicates")
-    ax[2,1].plot([N**2 for N in N_list], times_random[:,2], color='k', label="Random 0 to 2N")
-    ax[2,1].legend(fontsize='small')
-    ax[2,1].set_xlabel('N^2')
-    ax[2,1].set_ylabel('Time (s)')
+    ax[1,1].set_title("Time against N^2 for istar=N-1")
+    ax[1,1].plot([N**2 for N in N_list], times_desc[:,2], color='y', label="Descending")
+    ax[1,1].plot([N**2 for N in N_list], times_random[:,2], color='m', label="Random 0 to 2N")
+    ax[1,1].plot([N**2 for N in N_list], times_asc[:,2], color='c', label="Ascending")
+    ax[1,1].legend(fontsize='small')
+    ax[1,1].set_xlabel('N^2')
+    ax[1,1].set_ylabel('Time (s)')
 
     plt.tight_layout()
     plt.show()
