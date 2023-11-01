@@ -26,7 +26,7 @@
 %Place your discussion for question 1 here
 The strategy \textit{part1} uses is a hybrid sorting algorithm, where initially the elements of the list are sorted using an insertion sort for an index $i \leq istar$. Then, a variation of the insertion using a binary search to replace the reverse linear search determines where to insert the subsequent elements with an index $i>istar$.
 
-Considering the number of comparisons, the worst-case scenario for an insertion sort of length $n$ is when the list is sorted in reverse, and by lecture slides, this has an $\mathcal{O}(n^2)$ time complexity. Hence for $i \leq istar$, the worst-case computational cost is $\mathcal{O}(istar^2)$. 
+Considering the number of comparisons, the worst-case scenario for an insertion sort of length $n$ is when the list is sorted in reverse, and by lecture slides, this has an $\mathcal{O}(n^2)$ time complexity. Hence for $i \leq istar$, the worst-case computational cost is $\mathcal{O}(istar^2)$.
 
 For the case where $i > istar$, a binary search is performed on the elements up to $i$ to determine its location in the sorted list of size $i$. The worst-case scenario for a binary search of size $i$ has a time complexity of $\mathcal{O}(\log(i))$ as seen by lecture slides. This search is performed on $i$ from $istar+1$ up to $N-1$, so the overall complexity is  $\log(istar + 1) + \log(istar + 2) \ldots + \log(N-1)$. Hence the worst-case computational cost of this part of the algorithm is $\mathcal{O}(N\log(N))$.
 
@@ -44,7 +44,7 @@ In the first plot, we plot time against $N$ for different choices of $istar$ whe
 
 In the second plot, we plot time against $N$ for different choices of $istar$ when sorting a list in ascending order. We observe the greater the $istar$ the faster the wall time. This is expected as for a list in ascending order, the reverse linear search part of the algorithm has a complexity of $\mathcal{O}(1)$ compared to the slower complexity of the binary search $\mathcal{O}(log(N))$. 
 
-In the third plot, we observe that for $istar=0$ (entirely using a binary search modified insertion sort), plotting time against $N\log N$ exhibits an almost linear relationship for the random list. We also observe that a sorted list in ascending order is faster than a random list and a list in descending order. This is possibly due to the swapping part of the algorithm, as for a list in ascending order, this assignment is of $\mathcal{O}(1)$ complexity.
+In the third plot, we observe that for $istar=0$ (entirely using a binary search modified insertion sort), plotting time against $N\log N$ exhibits an almost linear relationship for a random list. We also observe that a sorted list in ascending order is faster than a random list and a list in descending order. This is possibly due to the swapping part of the algorithm, as for a list in ascending order, this assignment is of $\mathcal{O}(1)$ complexity.
 
 In the fourth plot, we observe that for $istar=N-1$ (entirely using a classic insertion sort), plotting time against $N^2$ exhibits an almost linear positive relationship for a list in descending order and a random list. This supports our calculation of a $\mathcal{O}(N^2)$ worst-case time complexity. We also observe that an ascending list is significantly faster than a random list, which is faster than a descending list. 
 
@@ -80,6 +80,7 @@ The use of a dictionary over a list to store the hashes for T is to make the has
 In the worst-case scenario, there are many hash collisions i.e. the dictionary has few unique keys with long lists of indexes. Looping through each sub-string of S has a complexity of $\mathcal{O}(n)$, looping through each T hash dictionary list of indexes would have a complexity of $\mathcal{O}(l)$, and we assume the complexity of a character comparison is $\mathcal{O}(m)$, hence my algorithm would have computational cost of $\mathcal{O}(lmn)$. This would be equivalent to the naive case of double looping through every length-m sub-string of S and T and performing a character-by-character check. However, this case is unlikely for large $l$, $m$, and $n$, and by choosing a large prime, fewer hash collisions will occur (at the expense of memory usage).
 
 In the best-case scenario, there would be no hash matches, so the lists in the T hash dictionary and character comparisons would not have to occur, and my algorithm would have a computational cost of $\mathcal{O}(l + n)$ for simply calculating each hash value.
+
 %---------------- End Part 2 -------------------
 
 
