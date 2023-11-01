@@ -24,8 +24,13 @@
 
 \subsubsection*{1.}
 %Place your discussion for question 1 here
-The strategy \textit{part1} uses a hybrid sorting algorithm, where initially the elements of the list are sorted using an insertion sort, up to the index \textit{istar}. Then, a binary search is used to determine where to insert the following elements with an index greater than \textit{istar}. 
+The strategy \textit{part1} uses a hybrid sorting algorithm, where initially the elements of the list are sorted using an insertion sort, up to the index $istar$. Then, a variation of the insertion using a binary search determines where to insert the subsequent elements with an index greater than $istar$. 
 
+The worst-case scenario for an insertion sort of length $n$ is when the list is reversed, and by lecture slides, this has an $\mathcal{O}(n^2)$ time complexity. Hence for $i \leq istar$, the worst-case computational cost is $\mathcal{O}(istar^2)$. 
+
+For the case where $i > istar$, a binary search is performed on the elements up to $i$ to determine its location in the sorted list. The worst-case comparison process in a binary search of size $i$ has a time complexity of $\mathcol{O}(\log(i))$ as seen by lecture slides, and since this process is done for $i$ from $istar+1$ up to $N-1$, the worst-case computational cost of this part of the algorithm is $\mathcol{O}(N\log(N))$.
+
+Combining both parts of the sorting algorithm means the worst-case computational cost for the algorithm overall is $O(istar^2 + N\log(N)$. By this conclusion, setting $istar$ to a smaller value would minimise computational cost.
 
 \subsubsection*{2.}
 %Place your discussion for question 2 here
@@ -54,6 +59,8 @@ The strategy \textit{part1} uses a hybrid sorting algorithm, where initially the
 \subsubsection*{2.}
 
 %Place your discussion for question 2 here}
+The method I use i
+
 %---------------- End Part 2 -------------------
 
 
