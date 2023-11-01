@@ -133,22 +133,23 @@ def part1_time(inputs=None):
     ax[0].set_title("Ascending")
     for k in range(nn):
         ax[0].plot(N_list, times_asc[:,k], label=istar_vals[k])
-        ax[0].legend()
 
     ax[1].set_title("Descending")
     for k in range(nn):
         ax[1].plot(N_list, times_desc[:,k], label=istar_vals[k])
-        ax[1].legend()
 
     ax[2].set_title("Random No Duplicates")
     for k in range(nn):
         ax[2].plot(N_list, times_nodup[:,k], label=istar_vals[k])
-        ax[2].legend()
 
     ax[3].set_title("Random 0 to 2N")
     for k in range(nn):
         ax[3].plot(N_list, times_random[:,k], label=istar_vals[k])
-        ax[3].legend()
+    
+    for j in range(4):
+        ax[j].legend()
+        ax[j].xlabel('N')
+        ax[j].ylabel('Time (s)')
 
     plt.show()
 
@@ -208,7 +209,99 @@ def part2(S,T,m):
 
     #  Base length-m hash in S
     hi = heval(X[:m],4,q)
+    hp = heval(Y[:m],4,q)
+    hp_dict = {hp: [0]}
 
+    #  Comparison of base length-m hash in T to base length-m hash in S
+    ind=0   #  index for S and X
+    if hi in hp_dict:
+        jnd = 0
+        if X[ind:ind+m] == Y[jnd:jnd+m]:
+            L[jnd].append(ind)
+
+    bm = 4**m % q   # Computed here for efficiency
+
+    #  Hash for each length-m string in T, and comparison against base length-m hash in S
+    for jnd in range(1, l-m+1):
+        hp = ((4*hp - int(Y[jnd-1])*bm + int(Y[jnd-1+m])) % q)
+        if hp in hp_dict:
+            hp_dict[hp].append(jnd)
+        else:
+            hp_dict[hp] = [jnd]
+        
+        if hi == hp:
+            if X[ind:ind+m] == Y[jnd:jnd+m]:
+                L[jnd].append(ind)
+        
+
+    #  Rabin Karp algorithm adapted from slides
+    for ind in range(1, n-m+1):
+        hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q
+        if hi in hp_dict:
+            for jnd in hp_dict[hi]:
+                if X[ind:ind+m] == Y[jnd:jnd+m]:
+                    L[jnd].append(ind)
+
+
+
+    #for k in range(l-m+1):
+    #    for ind in range(n-m+1):
+    #        if T[k:k+m] == S[ind:ind+m]:
+    #            L[k].append(ind)
+
+    return L
+
+def part22(S, T, m):
+    """Find locations in S of all length-m sequences in T
+    Input:
+    S,T: length-n and length-l gene sequences provided as strings
+
+    Output:
+    L: A list of lists where L[i] is a list containing all locations 
+    in S where the length-m sequence starting at T[i] can be found.
+   """
+    #Size parameters
+    n = len(S) 
+    l = len(T) 
+    
+    L = [[] for i in range(l-m+1)] #use/discard as needed
+
+    #Add code here for part 2, question 1
+
+    #  Function used from slides
+    def char2base4(S):
+        """Convert gene test_sequence
+        string to list of ints
+        """
+        c2b = {}
+        c2b['A']=0
+        c2b['C']=1
+        c2b['G']=2
+        c2b['T']=3
+        L=[]
+        for s in S:
+            L.append(c2b[s])
+        return L
+
+    #  Function used from slides
+    def heval(L,Base,Prime):
+        """Convert list L to base-10 number mod Prime
+        where Base specifies the base of L
+        """
+        f = 0
+        for l in L[:-1]:
+            f = Base*(l+f)
+        h = (f + (L[-1])) % Prime
+        return h
+        
+    X = char2base4(S)
+    Y = char2base4(T)
+
+    q = n-l     # Chosen prime
+
+    
+    #  Base length-m hash in S
+    hi = heval(X[:m],4,q)
     #  Base length-m hash in T
     hp = [heval(Y[:m],4,q)]
 
@@ -236,14 +329,7 @@ def part2(S,T,m):
             if hi==hp[jnd]:
                 if X[ind:ind+m] == Y[jnd:jnd+m]:
                     L[jnd].append(ind)
-
-
-
-    #for k in range(l-m+1):
-    #    for ind in range(n-m+1):
-    #        if T[k:k+m] == S[ind:ind+m]:
-    #            L[k].append(ind)
-
+    
     return L
 
 
@@ -251,22 +337,31 @@ if __name__=='__main__':
 
     #  Part 1
 
-    part1_time()
+    #part1_time()
 
 
     #Small example for part 2
-    '''
+    
     S = 'ATCGTACTAGTTATCGT'
     T = 'ATCGT'
     m = 3
     out = part2(S,T,m)
 
-    print(out)
-
     #Large gene sequence from which S and T test sequences can be constructed
     infile = open(r"Project 1\test_sequence.txt") #file from lab 3
     sequence = infile.read()
     infile.close()
-    '''
-
     
+    import time
+
+    t1 = time.time()
+    test1 = part2(sequence, T, m)
+    print(time.time()-t1)
+    print(test1[0][:5])
+
+    t2 = time.time()
+    test2 = part22(sequence, T, m)
+    print(time.time()-t2)
+    print(test2[0][:5])
+    
+    print(test1 == test2)
