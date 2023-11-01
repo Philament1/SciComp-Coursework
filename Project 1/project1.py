@@ -98,7 +98,6 @@ def part1_time(inputs=None):
             print(N, istar_vals[k], "rand", t3)
 
     #   Plots
-                
     fig, ax = plt.subplots(2,2)
 
     ax[0,0].set_title("Time against N for a list in descending order")
