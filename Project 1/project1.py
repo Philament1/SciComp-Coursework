@@ -97,7 +97,7 @@ def part1_time(inputs=None):
 
         return (t2-t1)/10
     
-    N_list = np.logspace(1, 4, num=10, dtype=int)    #   N values
+    N_list = np.logspace(1, 3, num=100, dtype=int)    #   N values
     istar_vals = ["0", "N//2", "N-1"]       #  istar cases
 
     mm = len(N_list)
@@ -109,48 +109,72 @@ def part1_time(inputs=None):
     times_nodup = np.zeros((mm,nn))     #   Random list with no duplicate values
     times_random = np.zeros((mm,nn))    #   Random list sampled from 0 to 2*N
 
+    #   Timing each case of N, istar, and input
     for j, N in enumerate(N_list):
         istars = [0, N//2, N-1]
         for k, istar in enumerate(istars):
             t1 = sortedlist_timer(N, istar, ascending=True)
-            print(N, istar_vals[k], "ascending", t1)
             times_asc[j,k] = t1
+            print(N, istar_vals[k], "asc", t1)
 
             t2 = sortedlist_timer(N, istar, ascending=False)
-            print(N, istar_vals[k], "descending", t2)
             times_desc[j,k] = t2
+            print(N, istar_vals[k], "desc", t2)
 
             t3 = noduplicateslist_timer(N, istar)
-            print(N, istar_vals[k], "no duplicates", t3)
             times_nodup[j,k] = t3
+            print(N, istar_vals[k], "nodup", t3)
+
 
             t4 = randomlist_timer(N, istar, 2*N)
-            print(N, istar_vals[k], "random", t4)
             times_random[j,k] = t4
+            print(N, istar_vals[k], "rand", t4)
+
                 
-    fig, ax = plt.subplots(1,4)
+    fig, ax = plt.subplots(3,2, figsize = (5, 8))
 
-    ax[0].set_title("Ascending")
+    #   Plots
+    ax[0,0].set_title("Ascending")
     for k in range(nn):
-        ax[0].plot(N_list, times_asc[:,k], label=istar_vals[k])
+        ax[0,0].plot(N_list, times_asc[:,k], label=istar_vals[k])
 
-    ax[1].set_title("Descending")
+    ax[0,1].set_title("Descending")
     for k in range(nn):
-        ax[1].plot(N_list, times_desc[:,k], label=istar_vals[k])
+        ax[0,1].plot(N_list, times_desc[:,k], label=istar_vals[k])
 
-    ax[2].set_title("Random No Duplicates")
+    ax[1,0].set_title("Random No Duplicates")
     for k in range(nn):
-        ax[2].plot(N_list, times_nodup[:,k], label=istar_vals[k])
+        ax[1,0].plot(N_list, times_nodup[:,k], label=istar_vals[k])
 
-    ax[3].set_title("Random 0 to 2N")
+    ax[1,1].set_title("Random 0 to 2N")
     for k in range(nn):
-        ax[3].plot(N_list, times_random[:,k], label=istar_vals[k])
+        ax[1,1].plot(N_list, times_random[:,k], label=istar_vals[k])
     
-    for j in range(4):
-        ax[j].legend()
-        ax[j].xlabel('N')
-        ax[j].ylabel('Time (s)')
+    for i in range(2):
+        for j in range(2):
+            ax[i,j].legend()
+            ax[i,j].set_xlabel('N')
+            ax[i,j].set_ylabel('Time (s)')
+    
+    ax[2,0].set_title("istar = 0")
+    ax[2,0].plot([N*np.log(N) for N in N_list], times_asc[:,0], color='c', label="Ascending")
+    ax[2,0].plot([N*np.log(N) for N in N_list], times_desc[:,0], color='m', label="Descending")
+    ax[2,0].plot([N*np.log(N) for N in N_list], times_nodup[:,0], color='y', label="Random No Duplicates")
+    ax[2,0].plot([N*np.log(N) for N in N_list], times_random[:,0], color='k', label="Random 0 to 2N")
+    ax[2,0].legend(fontsize='small')
+    ax[2,0].set_xlabel('NlogN')
+    ax[2,0].set_ylabel('Time (s)')
 
+    ax[2,1].set_title("istar = N-1")
+    ax[2,1].plot([N**2 for N in N_list], times_asc[:,2], color='c', label="Ascending")
+    ax[2,1].plot([N**2 for N in N_list], times_desc[:,2], color='y', label="Descending")
+    ax[2,1].plot([N**2 for N in N_list], times_nodup[:,2], color='m', label="Random No Duplicates")
+    ax[2,1].plot([N**2 for N in N_list], times_random[:,2], color='k', label="Random 0 to 2N")
+    ax[2,1].legend(fontsize='small')
+    ax[2,1].set_xlabel('N^2')
+    ax[2,1].set_ylabel('Time (s)')
+
+    plt.tight_layout()
     plt.show()
 
     return None #Modify if needed
@@ -205,140 +229,52 @@ def part2(S,T,m):
     X = char2base4(S)
     Y = char2base4(T)
 
-    q = n-l     # Chosen prime
+    q = 9973     # Chosen prime
 
     #  Base length-m hash in S
     hi = heval(X[:m],4,q)
+    #  Base length-m hash in T
     hp = heval(Y[:m],4,q)
+    #  Dictionary for all length-m hashes in T, with a list of index locations in T as the value
     hp_dict = {hp: [0]}
 
     #  Comparison of base length-m hash in T to base length-m hash in S
-    ind=0   #  index for S and X
-    if hi in hp_dict:
-        jnd = 0
-        if X[ind:ind+m] == Y[jnd:jnd+m]:
+    ind=0   #  Index for X
+    if hi == hp:    #  Base hash comparison
+        jnd = 0     #  Index for Y
+        if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
             L[jnd].append(ind)
 
     bm = 4**m % q   # Computed here for efficiency
 
-    #  Hash for each length-m string in T, and comparison against base length-m hash in S
+    #  Rabin Karp rolling hash for each length-m sub-string in T, adding to the dictionary, and comparison against base length-m hash in S
     for jnd in range(1, l-m+1):
-        hp = ((4*hp - int(Y[jnd-1])*bm + int(Y[jnd-1+m])) % q)
-        if hp in hp_dict:
+        hp = ((4*hp - int(Y[jnd-1])*bm + int(Y[jnd-1+m])) % q)  #  Hash calculation for length-m string in T
+        if hp in hp_dict:   #  Adding index to the dictionary
             hp_dict[hp].append(jnd)
         else:
             hp_dict[hp] = [jnd]
         
-        if hi == hp:
-            if X[ind:ind+m] == Y[jnd:jnd+m]:
+        if hi == hp:        #  Comparison against base length-m hash in S
+            if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
                 L[jnd].append(ind)
         
 
     #  Rabin Karp algorithm adapted from slides
     for ind in range(1, n-m+1):
-        hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q
-        if hi in hp_dict:
-            for jnd in hp_dict[hi]:
-                if X[ind:ind+m] == Y[jnd:jnd+m]:
-                    L[jnd].append(ind)
-
-
-
-    #for k in range(l-m+1):
-    #    for ind in range(n-m+1):
-    #        if T[k:k+m] == S[ind:ind+m]:
-    #            L[k].append(ind)
+        hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q    #  Hash calculation for length-m sub-string in S
+        if hi in hp_dict:   #  Checking whether it matches a hash in the T hash dictionary
+            for jnd in hp_dict[hi]:     #  For each index in the T hash dictionary value
+                if X[ind:ind+m] == Y[jnd:jnd+m]:    #  String match check
+                    L[jnd].append(ind)  #  Append to L
 
     return L
-
-def part22(S, T, m):
-    """Find locations in S of all length-m sequences in T
-    Input:
-    S,T: length-n and length-l gene sequences provided as strings
-
-    Output:
-    L: A list of lists where L[i] is a list containing all locations 
-    in S where the length-m sequence starting at T[i] can be found.
-   """
-    #Size parameters
-    n = len(S) 
-    l = len(T) 
-    
-    L = [[] for i in range(l-m+1)] #use/discard as needed
-
-    #Add code here for part 2, question 1
-
-    #  Function used from slides
-    def char2base4(S):
-        """Convert gene test_sequence
-        string to list of ints
-        """
-        c2b = {}
-        c2b['A']=0
-        c2b['C']=1
-        c2b['G']=2
-        c2b['T']=3
-        L=[]
-        for s in S:
-            L.append(c2b[s])
-        return L
-
-    #  Function used from slides
-    def heval(L,Base,Prime):
-        """Convert list L to base-10 number mod Prime
-        where Base specifies the base of L
-        """
-        f = 0
-        for l in L[:-1]:
-            f = Base*(l+f)
-        h = (f + (L[-1])) % Prime
-        return h
-        
-    X = char2base4(S)
-    Y = char2base4(T)
-
-    q = n-l     # Chosen prime
-
-    
-    #  Base length-m hash in S
-    hi = heval(X[:m],4,q)
-    #  Base length-m hash in T
-    hp = [heval(Y[:m],4,q)]
-
-    #  Comparison of base length-m hash in T to base length-m hash in S
-    ind=0   #  index for S and X
-    jnd=0   #  index for T and Y
-    if hi==hp[jnd]:
-        if X[ind:ind+m] == Y[jnd:jnd+m]:
-            L[jnd].append(ind)
-
-    bm = 4**m % q   # Computed here for efficiency
-
-    #  Hash for each length-m string in T, and comparison against base length-m hash in S
-    for jnd in range(1, l-m+1):
-        hp.append((4*hp[-1] - int(Y[jnd-1])*bm + int(Y[jnd-1+m])) % q)
-        if hi==hp[jnd]:
-            if X[ind:ind+m] == Y[jnd:jnd+m]:
-                L[jnd].append(ind)
-        
-
-    #  Rabin Karp algorithm adapted from slides
-    for ind in range(1, n-m+1):
-        hi = (4*hi - int(X[ind-1])*bm + int(X[ind-1+m])) % q
-        for jnd in range(l-m+1):
-            if hi==hp[jnd]:
-                if X[ind:ind+m] == Y[jnd:jnd+m]:
-                    L[jnd].append(ind)
-    
-    return L
-
 
 if __name__=='__main__':
 
     #  Part 1
 
-    #part1_time()
-
+    part1_time()
 
     #Small example for part 2
     
@@ -351,17 +287,12 @@ if __name__=='__main__':
     infile = open(r"Project 1\test_sequence.txt") #file from lab 3
     sequence = infile.read()
     infile.close()
-    
+
+    '''
     import time
 
     t1 = time.time()
-    test1 = part2(sequence, T, m)
+    test1 = part2(sequence, S, m)
     print(time.time()-t1)
     print(test1[0][:5])
-
-    t2 = time.time()
-    test2 = part22(sequence, T, m)
-    print(time.time()-t2)
-    print(test2[0][:5])
-    
-    print(test1 == test2)
+    '''
