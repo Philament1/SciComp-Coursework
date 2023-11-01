@@ -104,11 +104,6 @@ def part1_time(inputs=None):
     for k in range(nn):
         ax[0,0].plot(N_list, times_desc[:,k], label=istar_vals[k])
 
-    '''
-    ax[0,1].set_title("Time against N for a random list sampled from 0 to 2N")
-    for k in range(nn):
-        ax[0,1].plot(N_list, times_random[:,k], label=istar_vals[k])
-    '''
     ax[0,1].set_title("Time against N for a list in ascending order")
     for k in range(nn):
         ax[0,1].plot(N_list, times_asc[:,k], label=istar_vals[k])
