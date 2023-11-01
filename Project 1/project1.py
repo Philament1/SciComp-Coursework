@@ -53,7 +53,7 @@ def part1_time(inputs=None):
     
     def timer(N, istar, sort=False, desc=False):
         """
-        Timer for list of length N from a sample of 0 to 2N
+        Timer for list of length N from a sample from 0 to 2N
         """
         
         input = list(np.random.randint(0, 2*N, size=N))
