@@ -243,12 +243,3 @@ if __name__=='__main__':
     infile = open(r"Project 1\test_sequence.txt") #file from lab 3
     sequence = infile.read()
     infile.close()
-
-    '''
-    import time
-
-    t1 = time.time()
-    test1 = part2(sequence, S, m)
-    print(time.time()-t1)
-    print(test1[0][:5])
-    '''
