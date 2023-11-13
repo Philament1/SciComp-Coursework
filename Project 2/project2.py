@@ -54,6 +54,8 @@ def searchPKR(G,s,x):
     x: an integer corresponding to a node in G
     """
 
+    G = G.copy()        # Added
+
     Fdict = {}
     Mdict = {}
     Mlist = []
