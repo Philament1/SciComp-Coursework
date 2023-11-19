@@ -28,12 +28,13 @@ def custom_graph():
 #G = weighted_ba_graph(10, 2, 16)
 
 G = custom_graph()
+G_ = G.copy()
 
 print([(neighbor, weight) for neighbor, weight in G[0].items()])
 
-search1 = searchGPT(G, 0, 1)
+search1 = searchGPT(G_, 0, 1)
 
-search2 = searchPKR(G, 0, 1)
+search2 = searchPKR(G_, 0, 1)
 
 
 print(search1)

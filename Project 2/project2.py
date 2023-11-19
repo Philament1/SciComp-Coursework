@@ -1,7 +1,7 @@
 """
 Code for Scientific Computation Project 2
 Please add college id here
-CID:
+CID: 02027072
 """
 import heapq
 import numpy as np
@@ -54,15 +54,13 @@ def searchPKR(G,s,x):
     x: an integer corresponding to a node in G
     """
 
-    G = G.copy()        # Added
-
     Fdict = {}
     Mdict = {}
     Mlist = []
     dmin = float('inf')
     n = len(G)
     G.add_node(n)
-    heapq.heappush(Mlist,[1,s])
+    heapq.heappush(Mlist,[0,s])
     Mdict[s]=Mlist[0]
     found = False
 
@@ -106,6 +104,43 @@ def searchPKR2(G,s,x):
 
     #return dmin and list
 
+    Fdict = {}
+    Mdict = {}
+    Mlist = []
+    dmin = float('inf')
+    n = len(G)
+    G.add_node(n)
+    heapq.heappush(Mlist,[0,s])
+    Mdict[s]=Mlist[0]
+    found = False
+
+    while len(Mlist)>0:
+        dmin,nmin = heapq.heappop(Mlist)
+        if nmin == x:
+            found = True
+            break
+
+        Fdict[nmin] = dmin
+
+        for m,en,wn in G.edges(nmin,data='weight'):
+            if en in Fdict:
+                pass
+            elif en in Mdict:
+                dcomp = max(dmin,wn)
+                if dcomp<Mdict[en][0]:
+                    l = Mdict.pop(en)
+                    l[1] = n
+                    lnew = [dcomp,en]
+                    heapq.heappush(Mlist,lnew)
+                    Mdict[en]=lnew
+            else:
+                dcomp = max(dmin,wn)
+                lnew = [dcomp,en]
+                heapq.heappush(Mlist, lnew)
+                Mdict[en] = lnew
+
+    return dmin
+
 #===== Code for Part 2=====#
 def part2q1(y0,tf=1,Nt=5000):
     """
@@ -128,7 +163,7 @@ def part2q1(y0,tf=1,Nt=5000):
     tarray = np.linspace(0,tf,Nt+1)
     yarray = np.zeros((Nt+1,n))
     yarray[0,:] = y0
-    beta = 0.04/np.pi**2
+    beta = 10000/np.pi**2
     alpha = 1-2*beta
     
     def RHS(t,y):
@@ -166,15 +201,29 @@ def part2q1new(y0,tf=40,Nt=800):
     yarray: Nt+1 x n array containing y at
             each time step including the initial condition.
     """
+    from scipy.integrate import solve_ivp
     
     #Set up parameters, arrays
     n = y0.size
     tarray = np.linspace(0,tf,Nt+1)
     yarray = np.zeros((Nt+1,n))
     yarray[0,:] = y0
-    beta = 0.04/np.pi**2
+    beta = 10000/np.pi**2
     alpha = 1-2*beta
     
+    def RHS(t,y):
+        """
+        Compute RHS of model
+        """        
+        dydt = np.zeros_like(y)
+        dydt[1:-1] = alpha*y[1:-1]-y[1:-1]**3 + beta*(y[2:]+y[:-2])
+        dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[-1])
+        dydt[-1] = alpha*y[-1]-y[-1]**3 + beta*(y[0]+y[-2])
+
+        return dydt 
+    
+    sol = solve_ivp(RHS, [tarray[0],tarray[-1]], y0, method='BDF', t_eval=tarray)
+    yarray = np.transpose(sol.y)
 
     return tarray,yarray
 
@@ -185,12 +234,23 @@ def part2q2(): #add input variables if needed
     Code to load initial conditions is included below
     """
 
-    data = np.load('project2.npy') #modify/discard as needed
+    data = np.load(r'Project 2\project2.npy') #modify/discard as needed
     y0A = data[0,:] #first initial condition
     y0B = data[1,:] #second initial condition
 
     #Add code here
 
+    n = len(y0A)
+    tA, yA = part2q1new(y0A, 40, 600)
+    tB, yB = part2q1new(y0B, 40, 600)
+    
+    fig, ax = plt.subplots(2, 1)
+    for k in np.linspace(0, n, 10, endpoint=False, dtype=int):
+        print(k)
+        ax[0].plot(tA, yA[:,k])
+        ax[1].plot(tB, yB[:,k])
+
+    plt.show()
 
     return None #modify as needed
 
@@ -223,7 +283,7 @@ def part2q3(tf=10,Nt=1000,mu=0.2,seed=1):
         """
         Compute RHS of model
         """
-        dydt = np.array([0,0,0])
+        dydt = np.array([0.,0.,0.])
         dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[2])
         dydt[1] = alpha*y[1]-y[1]**3 + beta*(y[0]+y[2])
         dydt[2] = alpha*y[2]-y[2]**3 + beta*(y[0]+y[1])
@@ -249,5 +309,36 @@ def part2q3Analyze(): #add input variables as needed
     """
   
     #add code for generating figures and any other relevant calculations here
+
+    mus = np.linspace(-0.5, 0.5, 11)
+
+    '''
+    fig, ax = plt.subplots(len(mus), 1)
+
+    for m, mu in enumerate(mus):
+        t, y = part2q3(mu)
+        ax[m].set_title(f'mu = {mu}')
+        for k in range(y.shape[1]):
+            ax[m].plot(t, y[:,k], label = k)
+
+    plt.legend()
+    plt.show()
+    '''
+    
+
+    
+    fig, ax = plt.subplots(3, 1)
+
+    for k in range(3):
+        ax[k].set_title(k)
+
+    for m, mu in enumerate(mus):
+        t, y = part2q3(mu)
+        for k in range(3):
+            ax[k].plot(t, y[:,k], label=mu)
+    
+    plt.legend()
+    plt.show()
+    
 
     return None #modify as needed
