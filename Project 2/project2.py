@@ -115,7 +115,9 @@ def searchPKR2(G,s,x):
     found = False
 
     while len(Mlist)>0:
+
         dmin,nmin = heapq.heappop(Mlist)
+        print(f"Node:", nmin)
         if nmin == x:
             found = True
             break
@@ -126,11 +128,16 @@ def searchPKR2(G,s,x):
             if en in Fdict:
                 pass
             elif en in Mdict:
+                print(f"Mlist??:{Mlist}")
                 dcomp = max(dmin,wn)
                 if dcomp<Mdict[en][0]:
+                    print(f"Mlist??:{Mlist}")
                     l = Mdict.pop(en)
                     l[1] = n
+                    print(f"Mlist??:{Mlist}")
                     lnew = [dcomp,en]
+                    print(lnew)
+                    
                     heapq.heappush(Mlist,lnew)
                     Mdict[en]=lnew
             else:
@@ -138,6 +145,9 @@ def searchPKR2(G,s,x):
                 lnew = [dcomp,en]
                 heapq.heappush(Mlist, lnew)
                 Mdict[en] = lnew
+        print(f"Fdict:{Fdict}")
+        print(f"Mdict:{Mdict}")
+        print(f"Mlist:{Mlist}") 
 
     return dmin
 
@@ -240,15 +250,82 @@ def part2q2(): #add input variables if needed
 
     #Add code here
 
+    import scipy
+
     n = len(y0A)
-    tA, yA = part2q1new(y0A, 40, 600)
-    tB, yB = part2q1new(y0B, 40, 600)
+    t_max = 40
+    Nt = 600
+
+    tA, yA = part2q1new(y0A, t_max, Nt)
+    tB, yB = part2q1new(y0B, t_max, Nt)
     
-    fig, ax = plt.subplots(2, 1)
-    for k in np.linspace(0, n, 10, endpoint=False, dtype=int):
-        print(k)
-        ax[0].plot(tA, yA[:,k])
-        ax[1].plot(tB, yB[:,k])
+    beta = 10000/np.pi**2
+    alpha = 1-2*beta
+    
+    def RHS(y):
+        """
+        Compute RHS of model
+        """        
+        dydt = np.zeros_like(y)
+        dydt[1:-1] = alpha*y[1:-1]-y[1:-1]**3 + beta*(y[2:]+y[:-2])
+        dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[-1])
+        dydt[-1] = alpha*y[-1]-y[-1]**3 + beta*(y[0]+y[-2])
+
+        return dydt 
+
+    solA = scipy.optimize.root(RHS, y0A, method='hybr')
+    yA_eq = solA.x
+
+    solB = scipy.optimize.root(RHS, y0B)
+    yB_eq = solB.x
+
+    #   Perturbation analysis
+
+    def get_pert_sol(eq, t, init):
+        """
+        Get the general solution of RHS for perturbations 
+        """
+        M = scipy.sparse.diags([alpha - 3*eq**2] + [beta]*4, [0, 1, -1, n-1, -(n-1)])
+
+        l, v = np.linalg.eig(M.toarray())
+        c = np.linalg.solve(v, init)
+
+        sol = np.exp(np.outer(t, l)) @ (v * c[:None]).T
+
+        return sol
+
+    yA_sol = get_pert_sol(yA_eq, tA, y0A)
+    yB_sol = get_pert_sol(yB_eq, tB, y0B)
+
+    print(yA_sol.shape)
+
+    #   Plots
+    fig, ax = plt.subplots(2, 4)
+
+    for k in range(n):
+        ax[0, 0].plot(tA, yA[:,k])
+        ax[1, 0].plot(tB, yB[:,k])
+
+        ax[0, 2].plot(tA, yA_sol[:,k])
+        ax[1, 2].plot(tB, yB_sol[:,k])
+
+    for t_step in np.linspace(0, Nt, num=5, dtype=int):
+        t = t_step*t_max/Nt
+
+        ax[0, 1].plot(range(n), yA[t_step], label=t)
+        ax[1, 1].plot(range(n), yB[t_step], label=t)
+
+        ax[0, 3].plot(range(n), yA_sol[t_step], label=t)
+        ax[1, 3].plot(range(n), yB_sol[t_step], label=t)
+
+    ax[0, 1].plot(yA_eq, label='eq')
+    ax[1, 1].plot(yB_eq, label='eq')
+
+    ax[0, 1].legend()
+    ax[1, 1].legend()
+    
+    ax[0, 3].legend()
+    ax[1, 3].legend()
 
     plt.show()
 
@@ -310,20 +387,24 @@ def part2q3Analyze(): #add input variables as needed
   
     #add code for generating figures and any other relevant calculations here
 
+    # N = 100
+
+    # for i in range(N):
+    #     t, y = part2q3()
+
+
     mus = np.linspace(-0.5, 0.5, 11)
 
-    '''
-    fig, ax = plt.subplots(len(mus), 1)
+    # fig, ax = plt.subplots(len(mus), 1)
 
-    for m, mu in enumerate(mus):
-        t, y = part2q3(mu)
-        ax[m].set_title(f'mu = {mu}')
-        for k in range(y.shape[1]):
-            ax[m].plot(t, y[:,k], label = k)
+    # for m, mu in enumerate(mus):
+    #     t, y = part2q3(mu)
+    #     ax[m].set_title(f'mu = {mu}')
+    #     for k in range(y.shape[1]):
+    #         ax[m].plot(t, y[:,k], label = k)
 
-    plt.legend()
-    plt.show()
-    '''
+    # plt.legend()
+    # plt.show()
     
 
     
@@ -333,12 +414,21 @@ def part2q3Analyze(): #add input variables as needed
         ax[k].set_title(k)
 
     for m, mu in enumerate(mus):
-        t, y = part2q3(mu)
+        t, y = part2q3(mu = mu)
         for k in range(3):
             ax[k].plot(t, y[:,k], label=mu)
+
+    plt.legend()
+    plt.show()
+
+    fig, ax = plt.subplots(1, 2)
+
+    t, y = part2q3(mu = 0)
+    for k in range(3):
+        ax[0].plot(t, y[:,k], label = k)
+
     
     plt.legend()
     plt.show()
     
-
     return None #modify as needed
