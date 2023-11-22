@@ -24,7 +24,11 @@
 
 \subsubsection*{1.}
 %Place your discussion for question 1 here
-The problem the functions attempt to solve is to find a path in a graph from a source node to a target node in such a way that the path minimises the maximum edge weight along the path. 
+The problem the functions attempt to solve is to find a path in a graph from a source node to a target node that minimises the weight of the maximum edge weight between two nodes along the path. 
+\[
+    w^* = \min_{p \in p(s,x)}( \max_{w \in p}( w ) )
+\]
+Both functions print the value of this minimum maximum edge weight, and \textit{searchGPT} also prints the path as a list of nodes from source to target. The strategy \textit{searchGPT} uses is an adapted version of Dijkstra's algorithm with a priority queue, but instead of tracking the distance from each node to the source in order to minimise it, it instead tracks the maximum edge weight on the path from each node to the source in order to minimise it.
 
 
 \subsubsection*{2.}
@@ -46,7 +50,51 @@ The problem the functions attempt to solve is to find a path in a graph from a s
 \subsubsection*{2.}
 %Place your discussion for question 2 here}
 
+From figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$, the values converge towards $1$.
 
+We assume that each initial condition $\mathbf{y_{0A}}$ and $\mathbf{y_{0B}}$ is ``close'' to an equilibrium point, so by applying \textit{scipy.optimize.root} onto the ODEs with initial guesses being the initial conditions, we find the equilibrium states $\overline{\mathbf{y_A}}$ and $\overline{\mathbf{y_B}}$. 
+
+By introducing the power series expansion for $y_i$, where $\bar{y}_i$ is an equilibrium state:
+\[
+    y_i = \bar{y}_i + \epsilon\Tilde{y}_i + \mathcal{O}(\epsilon^2), i = 0, 1, \cdots, n-1
+\]
+we get the following linearised equations for the perturbations:
+\begin{gather*}
+    \frac{d\tilde{y}_0}{dt} = (\alpha - 3\bar{y}_0^2)\tilde{y_0} + \beta(\tilde{y}_{n-1} + \tilde{y}_1) \\
+    \frac{d\tilde{y}_i}{dt} = (\alpha - 3\bar{y}_i^2)\tilde{y_i} + \beta(\tilde{y}_{i-1} + \tilde{y}_{i+1}), i=1, \cdots, n-1 \\
+    \frac{d\tilde{y}_{n-1}}{dt} = (\alpha - 3\bar{y}_{n-1}^2)\tilde{y}_{n-1} + \beta(\tilde{y}_0 + \tilde{y}_{n-2})
+\end{gather*}
+which can be written in matrix form as
+\[
+    \frac{d\mathbf{\tilde{y}}}{dt} = \mathbf{M_{\bar{y}}\mathbf{\tilde{y}}}
+\]
+where
+
+\[
+    \mathbf{M_{\bar{y}}}
+     =
+    \begin{pmatrix}
+        \alpha & \beta & & & \beta \\
+        \beta & \alpha & \beta & &\\
+        & \ddots & \ddots & \ddots & \\
+        & & \beta & \alpha & \beta \\        
+        \beta & & & \beta & \alpha 
+    \end{pmatrix}
+    -
+    \begin{pmatrix}
+        3\bar{y}_0^2 & & & & \\
+        & 3\bar{y}_1^2 & & &\\
+        & & \ddots & & \\
+        & & & 3\bar{y}_{n-2}^2 & \\        
+        & & & & 3\bar{y}_{n-1}^2
+    \end{pmatrix}
+\]
+
+We can then compute the $n$ eigenvalues $\mathbf{\lambda}_i$ and eigenvectors $\mathbf{v}_i$ of $\mathbf{M_{\bar{y}}}$ to find a general solution of the form
+\[
+    \mathbf{\Tilde{y}} = c_1\mathbf{v}_1\exp{\lambda_1t} + \cdots + c_n\mathbf{v}_n\exp{\lambda_nt}
+\]
+To find $c_i, i=1, \cdots, n$, we solve the linear equations 
 
 \subsubsection*{3.}
 %Place your discussion for question 3 here}
