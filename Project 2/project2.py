@@ -112,6 +112,7 @@ def searchPKR2(G,s,x):
     G.add_node(n)
     heapq.heappush(Mlist,[0,s])
     Mdict[s]=Mlist[0]
+    parents = {}
     found = False
 
     while len(Mlist)>0:
@@ -128,28 +129,35 @@ def searchPKR2(G,s,x):
             if en in Fdict:
                 pass
             elif en in Mdict:
-                print(f"Mlist??:{Mlist}")
                 dcomp = max(dmin,wn)
                 if dcomp<Mdict[en][0]:
-                    print(f"Mlist??:{Mlist}")
                     l = Mdict.pop(en)
                     l[1] = n
-                    print(f"Mlist??:{Mlist}")
                     lnew = [dcomp,en]
-                    print(lnew)
-                    
                     heapq.heappush(Mlist,lnew)
                     Mdict[en]=lnew
+                    parents[en] = nmin
             else:
                 dcomp = max(dmin,wn)
                 lnew = [dcomp,en]
                 heapq.heappush(Mlist, lnew)
                 Mdict[en] = lnew
+                parents[en] = nmin
         print(f"Fdict:{Fdict}")
         print(f"Mdict:{Mdict}")
         print(f"Mlist:{Mlist}") 
 
-    return dmin
+    path = []
+    if found:
+        m = x
+        while m != s:
+            path.append(m)
+            m = parents[m]
+        path.append(s)
+        path.reverse()
+
+    return dmin, path
+
 
 #===== Code for Part 2=====#
 def part2q1(y0,tf=1,Nt=5000):
@@ -212,6 +220,7 @@ def part2q1new(y0,tf=40,Nt=800):
             each time step including the initial condition.
     """
     from scipy.integrate import solve_ivp
+    from scipy import sparse
     
     #Set up parameters, arrays
     n = y0.size
@@ -221,14 +230,24 @@ def part2q1new(y0,tf=40,Nt=800):
     beta = 10000/np.pi**2
     alpha = 1-2*beta
     
+    # def RHS(t,y):
+    #     """
+    #     Compute RHS of model
+    #     """        
+    #     dydt = np.zeros_like(y)
+    #     dydt[1:-1] = alpha*y[1:-1]-y[1:-1]**3 + beta*(y[2:]+y[:-2])
+    #     dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[-1])
+    #     dydt[-1] = alpha*y[-1]-y[-1]**3 + beta*(y[0]+y[-2])
+
+    #     return dydt 
+
+    A = sparse.diags([beta, [beta]*(n-1), [alpha]*n, [beta]*(n-1), beta], [-(n-1), -1, 0, 1, n-1])
+
     def RHS(t,y):
         """
         Compute RHS of model
         """        
-        dydt = np.zeros_like(y)
-        dydt[1:-1] = alpha*y[1:-1]-y[1:-1]**3 + beta*(y[2:]+y[:-2])
-        dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[-1])
-        dydt[-1] = alpha*y[-1]-y[-1]**3 + beta*(y[0]+y[-2])
+        dydt = A @ y - y**3
 
         return dydt 
     
@@ -273,7 +292,7 @@ def part2q2(): #add input variables if needed
 
         return dydt 
 
-    solA = scipy.optimize.root(RHS, y0A, method='hybr')
+    solA = scipy.optimize.root(RHS, y0A)
     yA_eq = solA.x
 
     solB = scipy.optimize.root(RHS, y0B)
@@ -288,44 +307,61 @@ def part2q2(): #add input variables if needed
         M = scipy.sparse.diags([alpha - 3*eq**2] + [beta]*4, [0, 1, -1, n-1, -(n-1)])
 
         l, v = np.linalg.eig(M.toarray())
-        c = np.linalg.solve(v, init)
+        print(max(l), min(l))
+        c = scipy.linalg.solve(v, init)
 
         sol = np.exp(np.outer(t, l)) @ (v * c[:None]).T
 
         return sol
 
-    yA_sol = get_pert_sol(yA_eq, tA, y0A)
-    yB_sol = get_pert_sol(yB_eq, tB, y0B)
+    yA_sol = get_pert_sol(yA_eq, tA, y0A-yA_eq)
+    yB_sol = get_pert_sol(yB_eq, tB, y0B-yB_eq)
 
-    print(yA_sol.shape)
+    #   Plots and figures
 
-    #   Plots
-    fig, ax = plt.subplots(2, 4)
+    ##  Plots for A
+    fig, ax = plt.subplots(1, 3)
 
     for k in range(n):
-        ax[0, 0].plot(tA, yA[:,k])
-        ax[1, 0].plot(tB, yB[:,k])
+        ax[0].plot(tA, yA[:,k])
 
-        ax[0, 2].plot(tA, yA_sol[:,k])
-        ax[1, 2].plot(tB, yB_sol[:,k])
+    # for t_step in np.linspace(0, Nt, num=5, dtype=int):
+    #     t = t_step*t_max/Nt
+    for t_step in range(Nt+1):
+        ax[1].plot(range(n), yA[t_step])
+        
 
-    for t_step in np.linspace(0, Nt, num=5, dtype=int):
-        t = t_step*t_max/Nt
+    ax[2].plot(yA_eq, label='eq')
 
-        ax[0, 1].plot(range(n), yA[t_step], label=t)
-        ax[1, 1].plot(range(n), yB[t_step], label=t)
+    fig, ax = plt.subplots(1, 2)
 
-        ax[0, 3].plot(range(n), yA_sol[t_step], label=t)
-        ax[1, 3].plot(range(n), yB_sol[t_step], label=t)
+    for k in range(n):
+        ax[0].plot(tA, yA_sol[:,k])
 
-    ax[0, 1].plot(yA_eq, label='eq')
-    ax[1, 1].plot(yB_eq, label='eq')
-
-    ax[0, 1].legend()
-    ax[1, 1].legend()
+    for t_step in range(Nt+1):
+        ax[1].plot(range(n), yA_sol[t_step])
     
-    ax[0, 3].legend()
-    ax[1, 3].legend()
+    ##  Plots for B
+
+    fig, ax = plt.subplots(1, 3)
+
+    for k in range(n):
+        ax[0].plot(tB, yB[:,k])
+    
+    for t_step in range(Nt+1):
+        ax[1].plot(range(n), yB[t_step])
+    
+    ax[2].plot(yB_eq, label='eq')
+
+    fig, ax = plt.subplots(1, 2)
+
+    for k in range(n):
+        ax[0].plot(tB, yB_sol[:,k])
+
+    #for t_step in np.linspace(0, Nt, num=5, dtype=int):
+        #t = t_step*t_max/Nt
+    for t_step in range(Nt+1):
+        ax[1].plot(range(n), yB_sol[t_step])
 
     plt.show()
 
