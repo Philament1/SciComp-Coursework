@@ -314,8 +314,8 @@ def part2q2(): #add input variables if needed
 
         return sol
 
-    yA_sol = get_pert_sol(yA_eq, tA, y0A-yA_eq)
-    yB_sol = get_pert_sol(yB_eq, tB, y0B-yB_eq)
+    yA_sol = get_pert_sol(yA_eq, tA, y0A - yA_eq)
+    yB_sol = get_pert_sol(yB_eq, tB, y0B - yB_eq)
 
     #   Plots and figures
 
