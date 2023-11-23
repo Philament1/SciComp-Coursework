@@ -318,7 +318,6 @@ def part2q2(): #add input variables if needed
     ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yA[t_step])
-    #ax[2].plot(yA_eq)
 
     fig, ax = plt.subplots(1, 2)
 
@@ -347,8 +346,6 @@ def part2q2(): #add input variables if needed
     ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yB[t_step])
-    
-    #ax[2].plot(yB_eq, label='eq')
 
     fig, ax = plt.subplots(1, 2)
 
@@ -359,8 +356,6 @@ def part2q2(): #add input variables if needed
     for k in range(n):
         ax[0].plot(tB, yB_sol[:,k])
 
-    #for t_step in np.linspace(0, Nt, num=5, dtype=int):
-        #t = t_step*t_max/Nt
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yB_sol[t_step])
 
