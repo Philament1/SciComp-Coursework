@@ -7,7 +7,7 @@
 \usepackage{amssymb}
 \newcommand{\trm}{\textrm}
 \newcommand{\pa}{\partial}
-\author{\emph{Your college ID here}}
+\author{\emph{02027072}}
 
 \usepackage{graphicx}
 
@@ -24,16 +24,22 @@
 
 \subsubsection*{1.}
 %Place your discussion for question 1 here
-The problem the functions attempt to solve is to find a path in a graph from a source node to a target node that minimises the weight of the maximum edge weight between two nodes along the path. 
+The problem the functions attempt to solve is to find a path in a graph from a source node to a target node that minimises the weight of the maximum edge weight between two nodes along the path. Let $P(s,x)$ be the set of paths from node $s$ to node $x$, where a path $p \in P(s,x)$ is the set of edge weights along the path. Then the problem can be written as:
 \[
-    w^* = \min_{p \in p(s,x)}( \max_{w \in p}( w ) )
+    w^* = \min_{p \in P(s,x)}\left( \max_{w \in p}( w ) \right)
 \]
 Both functions print the value of this minimum maximum edge weight, and \textit{searchGPT} also prints the path as a list of nodes from source to target. The strategy \textit{searchGPT} uses is an adapted version of Dijkstra's algorithm with a priority queue, but instead of tracking the distance from each node to the source in order to minimise it, it instead tracks the maximum edge weight on the path from each node to the source in order to minimise it.
 
 
 \subsubsection*{2.}
 %Place your discussion for question 2 here
+Both functions implement an altered form of Dijkstra's algorithm. Suppose the graph has $N$ nodes, then
 
+In the case where the source and target are disconnected or unreachable in the input graph, \textit{searchGPT} returns the value \textit{float(`inf')}, which can be interpreted as the minimum weight being infinite as there is no path. On the other hand, \textit{searchPKR2} returns a finite value, hence the algorithm is inapplicable to disconnected source and target nodes. 
+
+To return the path from source to target, \textit{searchGPT} creates a \textit{parents} dictionary, which stores and updates the parent node of each node that is reached and has their distance updated. Then, if the target node is reached, a \textit{path} list is created by starting with the target node and iterating the insertion of the parent node to the start of the list until the source node is inserted. Suppose the path is of length $k$, then the creation of this list has a computational cost of $\mathcal{O}(k^2)$, as the \textit{insert} function has cost $\mathcal{O}(k)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity
+
+For my code in \textit{searchPKR2}, I introduce the \textit{parents} dictionary in a similar way to \textit{searchGPT}. Then if the target is found, a \textit{path} list is created from the \textit{parent} dictionary. Unlike \textit{searchGPT}, \textit{searchPKR2} begins with the target node and appends each parent to the end of the list until the source node is reached, then reverses the list. Suppose the path is of length $k$, then the looped \textit{append} function has a cost of $\mathcal{O}(k)$, followed by a \textit{reverse} function with a cost of $\mathcal{O}(k)$, so overall the computational cost of the path is of $\mathcal{O}(k)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity of the \textit{path} list creation would be $\mathcal{O}(N)$. 
 
 
 %---------------- End Part 1 -------------------
@@ -94,7 +100,14 @@ We can then compute the $n$ eigenvalues $\mathbf{\lambda}_i$ and eigenvectors $\
 \[
     \mathbf{\Tilde{y}} = c_1\mathbf{v}_1\exp{\lambda_1t} + \cdots + c_n\mathbf{v}_n\exp{\lambda_nt}
 \]
-To find $c_i, i=1, \cdots, n$, we solve the linear equations 
+We find $c_i, i=1, \cdots, n$ that satisfy the initial conditions $\mathbf{y}_0$ by solving the linear equations:
+\[
+    \mathbf{V}\mathbf{c} = \mathbf{y}_0
+\]
+
+where $V$ is a matrix with columns being the eigenvectors, and $c$ is a column vector of the $c_i$ constants.
+
+From the figures, within the time $t= 0$ to $40$, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_A}}$ appear to initially converge before diverging, which shows it is unstable. The perturbations from the equilibrium point $\overline{\mathbf{y_B}}$ appear to converge, which indicates it is possibly stable.
 
 \subsubsection*{3.}
 %Place your discussion for question 3 here}
