@@ -307,8 +307,6 @@ def part2q2(): #add input variables if needed
     ##  Plots for A
     fig, ax = plt.subplots(1, 2)
 
-    plt.suptitle('Solution to Initial condition y0A')
-
     ax[0].set_xlabel('t')
     ax[0].set_ylabel('y(t)')
     for k in range(n):
@@ -320,8 +318,6 @@ def part2q2(): #add input variables if needed
         ax[1].plot(range(n), yA[t_step])
 
     fig, ax = plt.subplots(1, 2)
-
-    plt.suptitle('Perturbations for Initial condition y0A')
 
     ax[0].set_xlabel('t')
     ax[0].set_ylabel('y(t)')
@@ -337,8 +333,6 @@ def part2q2(): #add input variables if needed
 
     fig, ax = plt.subplots(1, 2)
 
-    plt.suptitle('Solution to Initial condition y0B')
-
     ax[0].set_xlabel('t')
     ax[0].set_ylabel('y(t)')
     for k in range(n):
@@ -350,8 +344,6 @@ def part2q2(): #add input variables if needed
         ax[1].plot(range(n), yB[t_step])
 
     fig, ax = plt.subplots(1, 2)
-
-    plt.suptitle('Perturbations for Initial condition y0B')
 
     ax[0].set_xlabel('t')
     ax[0].set_ylabel('y(t)')
