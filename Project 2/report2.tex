@@ -66,22 +66,22 @@ To efficiently compute the solution to the IVP, I use the \textit{scipy.integrat
 %Uncomment line below to display figure saved as fig1.png
 \includegraphics[width=0.8\textwidth]{fig1.png}
 
-\caption{Add figure description here}
+\caption{Solution to initial condition $\mathbf{y_{0A}}$}
 \label{fig1}
 \end{figure}
 
-From figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$, the values converge towards $1$ at around $t=30$ and diverge away from its nearby equilibrium. 
+From Figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$, the values converge towards $1$ at around $t=30$ and diverge away from its nearby equilibrium. 
 
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
 \includegraphics[width=0.8\textwidth]{fig2.png}
 
-\caption{Figure 1: Add figure description here}
+\caption{Solution to initial condition $\mathbf{y_{0B}}$}
 \label{fig2}
 \end{figure}
 
-From figure \ref{fig2}, we observe that from initial condition $\mathbf{y_{0B}}$, the values remain stable and close to the initial condition throughout. 
+From Figure \ref{fig2}, we observe that from initial condition $\mathbf{y_{0B}}$, the values remain stable and close to the initial condition throughout. 
 
 We assume that each initial condition $\mathbf{y_{0A}}$ and $\mathbf{y_{0B}}$ is ``close'' to an equilibrium point, so by applying \textit{scipy.optimize.root} onto the ODEs with initial guesses being the initial conditions, we find the equilibrium states $\overline{\mathbf{y_A}}$ and $\overline{\mathbf{y_B}}$. 
 
@@ -137,22 +137,22 @@ where $\mathbf{V}$ is a $n \times n$ matrix with columns as the eigenvectors, an
 %Uncomment line below to display figure saved as fig1.png
 \includegraphics[width=0.8\textwidth]{fig3.png}
 
-\caption{Figure 3: Add figure description here}
+\caption{Perturbations of equilibrium $\overline{\mathbf{y_A}}$}
 \label{fig3}
 \end{figure}
 
-From figure \ref{fig3}, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_A}}$ appear to initially converge before diverging at around $t=$, which shows it is unstable. The
+From Figure \ref{fig3}, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_A}}$ appear to initially converge before diverging at around $t=$, which shows it is unstable. The
 
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
 \includegraphics[width=0.8\textwidth]{fig4.png}
 
-\caption{Figure 4: Add figure description here}
+\caption{Perturbations of equilibrium $\overline{\mathbf{y_B}}$}
 \label{fig4}
 \end{figure}
 
-From figure \ref{fig4}, perturbations from the equilibrium point $\overline{\mathbf{y_B}}$ appear to converge very quickly, which indicates it is stable for at least $t <= 40$.
+From Figure \ref{fig4}, perturbations from the equilibrium point $\overline{\mathbf{y_B}}$ appear to converge very quickly, which indicates it is stable for at least $t <= 40$.
 
 \subsubsection*{3.}
 %Place your discussion for question 3 here}
