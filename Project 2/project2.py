@@ -143,9 +143,6 @@ def searchPKR2(G,s,x):
                 heapq.heappush(Mlist, lnew)
                 Mdict[en] = lnew
                 parents[en] = nmin
-        print(f"Fdict:{Fdict}")
-        print(f"Mdict:{Mdict}")
-        print(f"Mlist:{Mlist}") 
 
     path = []
     if found:
@@ -229,17 +226,6 @@ def part2q1new(y0,tf=40,Nt=800):
     yarray[0,:] = y0
     beta = 10000/np.pi**2
     alpha = 1-2*beta
-    
-    # def RHS(t,y):
-    #     """
-    #     Compute RHS of model
-    #     """        
-    #     dydt = np.zeros_like(y)
-    #     dydt[1:-1] = alpha*y[1:-1]-y[1:-1]**3 + beta*(y[2:]+y[:-2])
-    #     dydt[0] = alpha*y[0]-y[0]**3 + beta*(y[1]+y[-1])
-    #     dydt[-1] = alpha*y[-1]-y[-1]**3 + beta*(y[0]+y[-2])
-
-    #     return dydt 
 
     A = sparse.diags([beta, [beta]*(n-1), [alpha]*n, [beta]*(n-1), beta], [-(n-1), -1, 0, 1, n-1])
 
@@ -251,7 +237,7 @@ def part2q1new(y0,tf=40,Nt=800):
 
         return dydt 
     
-    sol = solve_ivp(RHS, [tarray[0],tarray[-1]], y0, method='BDF', t_eval=tarray)
+    sol = solve_ivp(RHS, [tarray[0],tarray[-1]], y0, method='BDF', t_eval=tarray, vectorized=True)
     yarray = np.transpose(sol.y)
 
     return tarray,yarray
@@ -307,34 +293,37 @@ def part2q2(): #add input variables if needed
         M = scipy.sparse.diags([alpha - 3*eq**2] + [beta]*4, [0, 1, -1, n-1, -(n-1)])
 
         l, v = np.linalg.eig(M.toarray())
-        print(max(l), min(l))
         c = scipy.linalg.solve(v, init)
 
         sol = np.exp(np.outer(t, l)) @ (v * c[:None]).T
 
         return sol
 
-    yA_sol = get_pert_sol(yA_eq, tA, y0A - yA_eq)
-    yB_sol = get_pert_sol(yB_eq, tB, y0B - yB_eq)
+    yA_sol = get_pert_sol(yA_eq, tA, y0A)
+    yB_sol = get_pert_sol(yB_eq, tB, y0B)
 
     #   Plots and figures
 
     ##  Plots for A
-    fig, ax = plt.subplots(1, 3)
+    fig, ax = plt.subplots(1, 2)
 
+    plt.suptitle('Solution to Initial condition y0A')
+
+    ax[0].set_xlabel('t')
+    ax[0].set_ylabel('y(t)')
     for k in range(n):
         ax[0].plot(tA, yA[:,k])
 
-    # for t_step in np.linspace(0, Nt, num=5, dtype=int):
-    #     t = t_step*t_max/Nt
+    ax[1].set_xlabel('index / k')
+    ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yA[t_step])
-        
-
-    ax[2].plot(yA_eq, label='eq')
+    #ax[2].plot(yA_eq)
 
     fig, ax = plt.subplots(1, 2)
 
+    ax[0].set_xlabel('t')
+    ax[0].set_ylabel('y(t)')
     for k in range(n):
         ax[0].plot(tA, yA_sol[:,k])
 
@@ -343,18 +332,26 @@ def part2q2(): #add input variables if needed
     
     ##  Plots for B
 
-    fig, ax = plt.subplots(1, 3)
-
-    for k in range(n):
-        ax[0].plot(tB, yB[:,k])
-    
-    for t_step in range(Nt+1):
-        ax[1].plot(range(n), yB[t_step])
-    
-    ax[2].plot(yB_eq, label='eq')
+    plt.suptitle('Solution to Initial condition y0B')
 
     fig, ax = plt.subplots(1, 2)
 
+    ax[0].set_xlabel('t')
+    ax[0].set_ylabel('y(t)')
+    for k in range(n):
+        ax[0].plot(tB, yB[:,k])
+    
+    ax[1].set_xlabel('index / k')
+    ax[1].set_ylabel('y[k]')
+    for t_step in range(Nt+1):
+        ax[1].plot(range(n), yB[t_step])
+    
+    #ax[2].plot(yB_eq, label='eq')
+
+    fig, ax = plt.subplots(1, 2)
+
+    ax[0].set_xlabel('t')
+    ax[0].set_ylabel('y(t)')
     for k in range(n):
         ax[0].plot(tB, yB_sol[:,k])
 
@@ -423,48 +420,52 @@ def part2q3Analyze(): #add input variables as needed
   
     #add code for generating figures and any other relevant calculations here
 
-    # N = 100
+    # mus = np.linspace(-0.5, 0.5, 11)
+    
+    # fig, ax = plt.subplots(3, 1)
 
-    # for i in range(N):
-    #     t, y = part2q3()
-
-
-    mus = np.linspace(-0.5, 0.5, 11)
-
-    # fig, ax = plt.subplots(len(mus), 1)
+    # for k in range(3):
+    #     ax[k].set_title(k)
 
     # for m, mu in enumerate(mus):
-    #     t, y = part2q3(mu)
-    #     ax[m].set_title(f'mu = {mu}')
-    #     for k in range(y.shape[1]):
-    #         ax[m].plot(t, y[:,k], label = k)
+    #     t, y = part2q3(mu = mu)
+    #     for k in range(3):
+    #         ax[k].plot(t, y[:,k], label=mu)
 
     # plt.legend()
     # plt.show()
-    
 
-    
-    fig, ax = plt.subplots(3, 1)
+    # fig, ax = plt.subplots(1, 2)
 
-    for k in range(3):
-        ax[k].set_title(k)
+    # t, y = part2q3(mu = 0)
+    # for k in range(3):
+    #     ax[0].plot(t, y[:,k], label = k)
 
-    for m, mu in enumerate(mus):
-        t, y = part2q3(mu = mu)
+    N_sim = 1000
+    mus = [0.2]
+
+    fig, ax = plt.subplots(2, 1)
+
+    t, y0 = part2q3(mu = 0)
+
+    for k in range(1):
+         ax[0].plot(t, y0[:,k])
+
+
+    for mu in mus:
+        y_all = []
+        for j in range(N_sim):
+            t, y = part2q3(mu = mu, seed=j)
+            y_all.append(y)
+
+        y_all = np.array(y_all)
+        y_bar = np.mean(y_all, axis=0)
+        
         for k in range(3):
-            ax[k].plot(t, y[:,k], label=mu)
+            ax[0].plot(t, y_bar[:,k])
+            #ax[0].plot(t, y_all[0, :, k])
 
-    plt.legend()
-    plt.show()
 
-    fig, ax = plt.subplots(1, 2)
-
-    t, y = part2q3(mu = 0)
-    for k in range(3):
-        ax[0].plot(t, y[:,k], label = k)
-
-    
-    plt.legend()
     plt.show()
     
     return None #modify as needed
