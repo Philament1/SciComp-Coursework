@@ -328,6 +328,8 @@ def part2q2(): #add input variables if needed
     for k in range(n):
         ax[0].plot(tA, yA_sol[:,k])
 
+    ax[1].set_xlabel('index / k')
+    ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yA_sol[t_step])
     
@@ -356,6 +358,8 @@ def part2q2(): #add input variables if needed
     for k in range(n):
         ax[0].plot(tB, yB_sol[:,k])
 
+    ax[1].set_xlabel('index / k')
+    ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yB_sol[t_step])
 
