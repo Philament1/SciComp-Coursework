@@ -29,7 +29,7 @@ The problem the functions attempt to solve is to find a path within the input \t
 \end{equation}
 where $w^*$ is the value of this minimum maximum edge weight.
 
-Both functions return the value of $w^*$, and \textit{searchGPT} also returns the optimal path as a list of nodes from source to target that the path traverses through. The strategy both functions use is an adjusted version of Dijkstra's algorithm with a priority queue, but instead of tracking the sum of the edge weights from each node to the source, it instead tracks the maximum edge weight on the path from each node to the source, which is then minimised. The priority queue is implemented with \textit{heapq} using \textit{heapq.push} to push elements to the list and \textit{heapq.pop} to pop elements from the list, such that they are ordered by maximum edge weight along the path to the node.
+Both functions return the value of $w^*$, and \textit{searchGPT} also returns the optimal path as a list of nodes from source to target that the path traverses through. The strategy both functions use is an adjusted version of Dijkstra's algorithm with a priority queue, but instead of tracking the sum of the edge weights from each node to the source, it instead tracks the maximum edge weight on the path from each node to the source, which is then minimised. The priority queue is implemented with \textit{heapq} using \textit{heapq.push} to push elements to the list and \textit{heapq.pop} to pop elements from the list, such that they are ordered by increasing maximum edge weight along the path to the node.
 
 
 \subsubsection*{2.}
@@ -37,7 +37,7 @@ Both functions return the value of $w^*$, and \textit{searchGPT} also returns th
 \paragraph{a)}
 For a graph with positive weights where the source and target node are connected, both \textit{searchGPT} and \textit{searchPKR2} return the same correct value that solves the problem \eqref{eq:minimax}.
 
-In the case where the source and target are disconnected or unreachable in the input graph, \textit{searchGPT} returns the value \textit{float(`inf')}, which can be interpreted as the minimum weight being infinite as there is no path. On the other hand, \textit{searchPKR2} returns a finite value with no connection to the problem \eqref{eq:minimax} along with an empty \textit{path} list, hence the method is inapplicable to disconnected source and target nodes. 
+In the case where the source and target are disconnected or unreachable in the input graph, \textit{searchGPT} returns the value \textit{float(`inf')}, which can be interpreted as the minimum weight being infinite as there is no path. On the other hand, \textit{searchPKR2} returns a finite value along with an empty \textit{path} list. The value returned is the maximum solution to problem \eqref{eq:minimax} for all nodes in the subgraph that are connected to the source, hence the method is inapplicable to disconnected source and target nodes.
 
 Another feature of \textit{searchPKR2} is that it adds a node to the input graph to act as a dummy node for dead weights in the priority queue. This is to prevent iterating through the \textit{for} loop once a dead weight reaches the front of the priority queue, as the dummy node has no neighbours. However, a drawback of this method is that the original input graph is also modified by the search function.
 
@@ -68,7 +68,7 @@ To efficiently compute the solution to the IVP, I use the \textit{scipy.integrat
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
-\includegraphics[width=0.8\textwidth]{fig1.png}
+\includegraphics[width=\textwidth]{fig1.png}
 
 \caption{Solution to initial condition $\mathbf{y_{0A}}$}
 \label{fig1}
@@ -79,7 +79,7 @@ From Figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
-\includegraphics[width=0.8\textwidth]{fig2.png}
+\includegraphics[width=\textwidth]{fig2.png}
 
 \caption{Solution to initial condition $\mathbf{y_{0B}}$}
 \label{fig2}
@@ -177,7 +177,11 @@ From Figure \ref{fig4}, we observe that perturbations from the equilibrium point
 
 \subsubsection*{3.}
 %Place your discussion for question 3 here}
-Our initial value for the stochastic differential equations are \[
+The function \textit{part2q3} attempts to solve the system of stochastic differential equations 
+\[
+    dY(t) = f(Y(t))dt + g(Y(T))dW(t)
+\]where $f(Y(t))$ is the set of equations in \textit{part2q1} and $g(Y(t))=\mu$. The ``Brownian step'' of our system is denoted by $dW(t)$.
+Our initial value for the stochastic differential equations is \[
     \mathbf{y_0} = 
     \begin{pmatrix}
         0.3 \\
@@ -185,12 +189,12 @@ Our initial value for the stochastic differential equations are \[
         0.5
     \end{pmatrix}
 \]
-and we consider each solution for 1000 timesteps until $t=10$, so $\delta t = 0.01$. We consider cases for $\mu = 0, \pm 0.2, \pm 0.4, \pm 0.6, \pm 0.8, \pm 1$. We take the average of 1000 simulations of the solution for each value of $mu$.
+The function solves this by applying the Euler-Maruyama method for 1000 timesteps until $t=10$, so $\Delta t = 0.01$. We consider cases for $\mu = 0, \pm 0.2, \pm 0.4, \pm 0.6, \pm 0.8, \pm 1$. We take the average of 1000 simulations of the solution for each value of $\mu$.
 
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
-\includegraphics[width=0.8\textwidth]{fig5.png}
+\includegraphics[width=\textwidth]{fig5.png}
 
 \caption{Plots of \textit{part2q3analyze}}
 \label{fig5}
@@ -198,9 +202,9 @@ and we consider each solution for 1000 timesteps until $t=10$, so $\delta t = 0.
 
 In Figure \ref{fig5}, in our upper plot, we see the average solution from our starting conditions for $\mu = 0, 0.2, 0.8$. In our lower plot, we see the average value of $Y$ at $t=10$ for a range of values of $\mu$.
 
-From the upper plot of Figure \ref{fig5}, we observe that when $\mu = 0$, without the Brownian motion component, our solution quickly converges to 1 for all initial starting points. When $\mu = 0.2$, the solution appears to converge to a value below $1$, and when $\mu = 0.8$, the solution appears to converge to 0. This is due to the fact that increasing $\mu$ means the stochastic component of the SDE dominates the deterministic part more, hence the solutions fluctuate more around the average of the $0$ mean Normal distribution.
+From the upper plot of Figure \ref{fig5}, we observe that when $\mu = 0$, without the Brownian motion component, our solution quickly converges to 1 for all initial starting points. When $\mu = 0.2$, the solution appears to converge to values below $1$, and when $\mu = 0.8$, the solution appears to converge to 0. It is clear that for larger values of $\mu$, there is more weight on the stochastic component of our system, hence there is more fluctuation in our solutions. 
 
-From the lower plot of Figure \ref{fig5}, we observe that $mu$ is symmetric for negative and positive values, which is expected as the Normal distribution is symmetric.
+From the lower plot of Figure \ref{fig5}, we observe that $\mu$ is symmetric for negative and positive values, which is expected as the Normal distribution is symmetric. We also observe that the greater the absolute value of $mu$, the closer to 0 the solution is at $t=10$. This is due to the fact that increasing $\mu$ means the stochastic component of the SDE dominates the deterministic part more, hence the solutions fluctuate more around the average of the 0-mean Normal distribution.
 
 %Add additional figures if needed
 %---------------- End Part 2 -------------------
