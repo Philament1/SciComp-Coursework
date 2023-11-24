@@ -418,7 +418,7 @@ def part2q3Analyze(): #add input variables as needed
     """
 
     N_sim = 1000
-    mus = [0.2, 0.4]
+    mus = [0.2, 0.8]
 
     t, y0 = part2q3(mu = 0)
     
@@ -477,6 +477,7 @@ def part2q3Analyze(): #add input variables as needed
     ax[1].legend()
     ax[1].set_xticks(np.linspace(-1, 1, 21))
 
+    plt.tight_layout()
     plt.show()
     
     return None #modify as needed
