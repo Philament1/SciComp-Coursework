@@ -152,7 +152,7 @@ def searchPKR2(G,s,x):
         path.append(s)
         path.reverse()  #   Reverse list
 
-    return dmin, path   #   Return dmin along with path
+    return dmin, path   #   Return dmin, path
 
 
 #===== Code for Part 2=====#
@@ -226,18 +226,18 @@ def part2q1new(y0,tf=40,Nt=800):
     beta = 10000/np.pi**2
     alpha = 1-2*beta
 
-    A = sparse.diags([beta, [beta]*(n-1), [alpha]*n, [beta]*(n-1), beta], [-(n-1), -1, 0, 1, n-1])
+    A = sparse.diags([beta, [beta]*(n-1), [alpha]*n, [beta]*(n-1), beta], [-(n-1), -1, 0, 1, n-1])  #   Sparse matrix for linear part of ODE
 
     def RHS(t,y):
         """
         Compute RHS of model
         """        
-        dydt = A @ y - y**3
+        dydt = A @ y - y**3     #   Combining linear part with cubic component
 
         return dydt 
     
-    sol = solve_ivp(RHS, [tarray[0],tarray[-1]], y0, method='BDF', t_eval=tarray, vectorized=True)
-    yarray = np.transpose(sol.y)
+    sol = solve_ivp(RHS, [tarray[0],tarray[-1]], y0, method='BDF', t_eval=tarray, vectorized=True)  #   Efficiently computed solution
+    yarray = np.transpose(sol.y)    #   Transposed to match the return in part2q1
 
     return tarray,yarray
 
@@ -418,19 +418,24 @@ def part2q3Analyze(): #add input variables as needed
     """
 
     N_sim = 1000
+
+    #   Analysis for upper plot
     mus = [0.2, 0.8]
 
+    ##  mu=0
     t, y0 = part2q3(mu = 0)
     
+    ##  mu=0.2
     y_all1 = []
-    for j in range(N_sim):
+    for j in range(N_sim):  #   Running 1000 simulations and averaging
         t, y = part2q3(mu = mus[0], seed=j)
         y_all1.append(y)
 
     y_all1 = np.array(y_all1)
     y_bar1 = np.mean(y_all1, axis=0)
 
-    y_all2 = []
+    ##  mu=0.8
+    y_all2 = []             #   Running 1000 simulations and averaging
     for j in range(N_sim):
         t, y = part2q3(mu = mus[1], seed=j)
         y_all2.append(y)
@@ -438,25 +443,26 @@ def part2q3Analyze(): #add input variables as needed
     y_all2 = np.array(y_all2)
     y_bar2 = np.mean(y_all2, axis=0)
 
-    mus = np.linspace(-1, 1, 21)
-    print(mus)
+    #   Analysis for lower plot
+    mus = np.linspace(-1, 1, 21)    #   Range of mus
     final_ys = []
 
     for mu in mus:
         final_y = []
-        if mu != 0:
-            for j in range(N_sim):
+        if mu != 0:     
+            for j in range(N_sim):  #   Running 1000 simulations and averaging
                 t, y = part2q3(mu = mu, seed=j)
                 final_y.append(y[-1,:])
             final_y = np.array(final_y)
             final_y = np.mean(final_y, axis=0)
-        else:
+        else:           #   If mu is 0, we only need to run 1 solution as there is no Brownian motion
             t, y = part2q3(mu = mu)
             final_y = y[-1,:]
         final_ys.append(final_y)
 
     final_ys = np.array(final_ys)
-    
+
+    #   Plots
     fig, ax = plt.subplots(2, 1)
 
     ax[0].set_title('Y against time')
@@ -465,15 +471,15 @@ def part2q3Analyze(): #add input variables as needed
     for k in range(3):
         ax[0].plot(t, y0[:,k], color = 'red', label='mu=0' if k==0 else '')
         ax[0].plot(t, y_bar1[:,k], color = 'blue', label='mu=0.2' if k==0 else '')
-        ax[0].plot(t, y_bar2[:,k], color = 'green', label='mu=0.4'  if k==0 else '')
+        ax[0].plot(t, y_bar2[:,k], color = 'green', label='mu=0.8'  if k==0 else '')
     ax[0].legend()
 
     ax[1].set_title('Y(t=10) against mu')
     ax[1].set_xlabel('mu')
     ax[1].set_ylabel('Y(t=10)')
-    ax[1].plot(mus, final_ys[:,0], color = 'orange', label='0.3')
-    ax[1].plot(mus, final_ys[:,1], color = 'purple', label='0.4')
-    ax[1].plot(mus, final_ys[:,2], color = 'olive', label='0.5')
+    ax[1].plot(mus, final_ys[:,0], color = 'orange', label='y0_0 = 0.3')
+    ax[1].plot(mus, final_ys[:,1], color = 'purple', label='y0_1 = 0.4')
+    ax[1].plot(mus, final_ys[:,2], color = 'olive', label='y0_2 = 0.5')
     ax[1].legend()
     ax[1].set_xticks(np.linspace(-1, 1, 21))
 
