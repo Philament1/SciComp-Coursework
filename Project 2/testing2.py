@@ -1,7 +1,7 @@
 import numpy as np
 from project2 import part2q1, part2q1new, part2q2, part2q3Analyze
 
-part2q2()
+#part2q2()
 
 
     # def RHS(t,y):
@@ -15,7 +15,7 @@ part2q2()
 
     #     return dydt 
 
-#part2q3Analyze()
+part2q3Analyze()
 
 # import scipy
 

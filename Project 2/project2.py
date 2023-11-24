@@ -112,11 +112,10 @@ def searchPKR2(G,s,x):
     G.add_node(n)
     heapq.heappush(Mlist,[0,s])
     Mdict[s]=Mlist[0]
-    parents = {}
+    parents = {}    #   Added parents dictionary
     found = False
 
     while len(Mlist)>0:
-
         dmin,nmin = heapq.heappop(Mlist)
         print(f"Node:", nmin)
         if nmin == x:
@@ -136,24 +135,24 @@ def searchPKR2(G,s,x):
                     lnew = [dcomp,en]
                     heapq.heappush(Mlist,lnew)
                     Mdict[en]=lnew
-                    parents[en] = nmin
+                    parents[en] = nmin  #   Update parent
             else:
                 dcomp = max(dmin,wn)
                 lnew = [dcomp,en]
                 heapq.heappush(Mlist, lnew)
                 Mdict[en] = lnew
-                parents[en] = nmin
+                parents[en] = nmin  #   Introduce parent
 
-    path = []
-    if found:
-        m = x
-        while m != s:
-            path.append(m)
+    path = []   #   Instantiate return path
+    if found:   #   Only run if target is found
+        m = x   #   Begin from target node
+        while m != s:   #   Iterate until source node is appended
+            path.append(m)  #   Add parent to list
             m = parents[m]
         path.append(s)
-        path.reverse()
+        path.reverse()  #   Reverse list
 
-    return dmin, path
+    return dmin, path   #   Return dmin along with path
 
 
 #===== Code for Part 2=====#
@@ -261,9 +260,11 @@ def part2q2(): #add input variables if needed
     t_max = 40
     Nt = 600
 
+    #   Finding solutions to IVP
     tA, yA = part2q1new(y0A, t_max, Nt)
     tB, yB = part2q1new(y0B, t_max, Nt)
-    
+
+    #   Finding equilibrium points close to IVP
     beta = 10000/np.pi**2
     alpha = 1-2*beta
     
@@ -285,7 +286,6 @@ def part2q2(): #add input variables if needed
     yB_eq = solB.x
 
     #   Perturbation analysis
-
     def get_pert_sol(eq, t, init):
         """
         Get the general solution of RHS for perturbations 
@@ -294,6 +294,9 @@ def part2q2(): #add input variables if needed
 
         l, v = np.linalg.eig(M.toarray())
         c = scipy.linalg.solve(v, init)
+
+        print(np.max(l))
+        print(np.min(l))
 
         sol = np.exp(np.outer(t, l)) @ (v * c[:None]).T
 
@@ -304,7 +307,7 @@ def part2q2(): #add input variables if needed
 
     #   Plots and figures
 
-    ##  Plots for A
+    ##  IVP plots for A
     fig, ax = plt.subplots(1, 2)
 
     ax[0].set_xlabel('t')
@@ -317,6 +320,7 @@ def part2q2(): #add input variables if needed
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yA[t_step])
 
+    ##  Perturbation plots for A
     fig, ax = plt.subplots(1, 2)
 
     ax[0].set_xlabel('t')
@@ -329,20 +333,20 @@ def part2q2(): #add input variables if needed
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yA_sol[t_step])
     
-    ##  Plots for B
-
+    ##  IVP plots for B
     fig, ax = plt.subplots(1, 2)
 
     ax[0].set_xlabel('t')
     ax[0].set_ylabel('y(t)')
     for k in range(n):
         ax[0].plot(tB, yB[:,k])
-    
+
     ax[1].set_xlabel('index / k')
     ax[1].set_ylabel('y[k]')
     for t_step in range(Nt+1):
         ax[1].plot(range(n), yB[t_step])
 
+    ##  Perturbation plots for B
     fig, ax = plt.subplots(1, 2)
 
     ax[0].set_xlabel('t')
@@ -412,54 +416,66 @@ def part2q3Analyze(): #add input variables as needed
     """
     Code for part 2, question 3
     """
-  
-    #add code for generating figures and any other relevant calculations here
-
-    # mus = np.linspace(-0.5, 0.5, 11)
-    
-    # fig, ax = plt.subplots(3, 1)
-
-    # for k in range(3):
-    #     ax[k].set_title(k)
-
-    # for m, mu in enumerate(mus):
-    #     t, y = part2q3(mu = mu)
-    #     for k in range(3):
-    #         ax[k].plot(t, y[:,k], label=mu)
-
-    # plt.legend()
-    # plt.show()
-
-    # fig, ax = plt.subplots(1, 2)
-
-    # t, y = part2q3(mu = 0)
-    # for k in range(3):
-    #     ax[0].plot(t, y[:,k], label = k)
 
     N_sim = 1000
-    mus = [0.2]
-
-    fig, ax = plt.subplots(2, 1)
+    mus = [0.2, 0.4]
 
     t, y0 = part2q3(mu = 0)
+    
+    y_all1 = []
+    for j in range(N_sim):
+        t, y = part2q3(mu = mus[0], seed=j)
+        y_all1.append(y)
 
-    for k in range(1):
-         ax[0].plot(t, y0[:,k])
+    y_all1 = np.array(y_all1)
+    y_bar1 = np.mean(y_all1, axis=0)
 
+    y_all2 = []
+    for j in range(N_sim):
+        t, y = part2q3(mu = mus[1], seed=j)
+        y_all2.append(y)
+
+    y_all2 = np.array(y_all2)
+    y_bar2 = np.mean(y_all2, axis=0)
+
+    mus = np.linspace(-1, 1, 21)
+    print(mus)
+    final_ys = []
 
     for mu in mus:
-        y_all = []
-        for j in range(N_sim):
-            t, y = part2q3(mu = mu, seed=j)
-            y_all.append(y)
+        final_y = []
+        if mu != 0:
+            for j in range(N_sim):
+                t, y = part2q3(mu = mu, seed=j)
+                final_y.append(y[-1,:])
+            final_y = np.array(final_y)
+            final_y = np.mean(final_y, axis=0)
+        else:
+            t, y = part2q3(mu = mu)
+            final_y = y[-1,:]
+        final_ys.append(final_y)
 
-        y_all = np.array(y_all)
-        y_bar = np.mean(y_all, axis=0)
-        
-        for k in range(3):
-            ax[0].plot(t, y_bar[:,k])
-            #ax[0].plot(t, y_all[0, :, k])
+    final_ys = np.array(final_ys)
+    
+    fig, ax = plt.subplots(2, 1)
 
+    ax[0].set_title('Y against time')
+    ax[0].set_xlabel('t')
+    ax[0].set_ylabel('Y(t)')
+    for k in range(3):
+        ax[0].plot(t, y0[:,k], color = 'red', label='mu=0' if k==0 else '')
+        ax[0].plot(t, y_bar1[:,k], color = 'blue', label='mu=0.2' if k==0 else '')
+        ax[0].plot(t, y_bar2[:,k], color = 'green', label='mu=0.4'  if k==0 else '')
+    ax[0].legend()
+
+    ax[1].set_title('Y(t=10) against mu')
+    ax[1].set_xlabel('mu')
+    ax[1].set_ylabel('Y(t=10)')
+    ax[1].plot(mus, final_ys[:,0], color = 'orange', label='0.3')
+    ax[1].plot(mus, final_ys[:,1], color = 'purple', label='0.4')
+    ax[1].plot(mus, final_ys[:,2], color = 'olive', label='0.5')
+    ax[1].legend()
+    ax[1].set_xticks(np.linspace(-1, 1, 21))
 
     plt.show()
     
