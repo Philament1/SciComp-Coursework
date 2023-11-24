@@ -23,7 +23,7 @@
 
 \subsubsection*{1.}
 %Place your discussion for question 1 here
-The problem the functions attempt to solve is to find a path in the input \textit{networkx} graph from a specified source node to a specified target node that minimises the weight of the maximum edge weight between two nodes along the path. Let $P(s,x)$ be the set of paths from node $s$ to node $x$, where a path $p$ is the set of edges $e$ along the path, and an edge has weight $w(e)$. Then the problem can be written as:
+The problem the functions attempt to solve is to find a path within the input \textit{networkx} graph from a specified source node to a specified target node that minimises the weight of the maximum edge weight between two nodes along the path. Let $P(s,x)$ be the set of paths from node $s$ to node $x$, where a path $p$ is the set of edges $e$ along the path, and an edge has weight $w(e)$. Then the problem can be written as:
 \begin{equation}
     w^* = \min_{p \in P(s,x)}\left( \max_{e \in p} w(e) \right) \label{eq:minimax}
 \end{equation}
@@ -34,15 +34,19 @@ Both functions return the value of $w^*$, and \textit{searchGPT} also returns th
 
 \subsubsection*{2.}
 %Place your discussion for question 2 here
+\paragraph{a)}
 For a graph with positive weights where the source and target node are connected, both \textit{searchGPT} and \textit{searchPKR2} return the same correct value that solves the problem \eqref{eq:minimax}.
 
-In the case where the source and target are disconnected or unreachable in the input graph, \textit{searchGPT} returns the value \textit{float(`inf')}, which can be interpreted as the minimum weight being infinite as there is no path. On the other hand, \textit{searchPKR2} returns a finite value with no connection to the problem \eqref{eq:minimax}, hence the method is inapplicable to disconnected source and target nodes. 
+In the case where the source and target are disconnected or unreachable in the input graph, \textit{searchGPT} returns the value \textit{float(`inf')}, which can be interpreted as the minimum weight being infinite as there is no path. On the other hand, \textit{searchPKR2} returns a finite value with no connection to the problem \eqref{eq:minimax} along with an empty \textit{path} list, hence the method is inapplicable to disconnected source and target nodes. 
 
+Another feature of \textit{searchPKR2} is that it adds a node to the input graph to act as a dummy node for dead weights in the priority queue. This is to prevent iterating through the \textit{for} loop once a dead weight reaches the front of the priority queue, as the dummy node has no neighbours. However, a drawback of this method is that the original input graph is also modified by the search function.
+
+\paragraph{b)}
 Both functions implement an altered form of Dijkstra's algorithm. From lectures, given a graph with $N$ nodes and $L$ edges, using Python $heapq$, we know that Dijkstra's has a computational cost of $\mathcal{O}((N+L)\log_2(N))$ for the search part of the algorithm.  On each iteration, whilst exploring the neighbours of the `current' node, when checking the edge weights of a new neighbour or updating a neighbour that has not yet been explored, the action of adding the new edge weight to the summed edge weights of the path to the current node is replaced with taking the maximum of the edge weight and the max edge weight of the current node. The cost of taking the $\max$ of two floats is the same as adding two floats, hence the cost of the search for both algorithms is still $\mathcal{O}((N+L)\log_2(N))$.
 
-To return the path from source to target, \textit{searchGPT} creates a \textit{parents} dictionary, which stores and updates the parent node of each node that is reached. Then, if the target node is reached, a \textit{path} list is created by starting with the target node and iterating the insertion of the parent node to the start of the list until the source node is inserted. Suppose the path is of length $k$, then the creation of this list has a computational cost of $\mathcal{O}(k^2)$, as the \textit{insert} function has cost $\mathcal{O}(k)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity would be $\mathcal{O}(N^2)$.
+To return the path from source to target, \textit{searchGPT} creates a \textit{parents} dictionary, which stores and updates the parent node of each node that is reached. Then, if the target node is found, a \textit{path} list is created by starting with the target node and iterating the insertion of the parent node to the start of the list until the source node is inserted. Applying the Python \textit{insert} function to a list of length n has a cost of $\mathcal{O}(n)$. Suppose the path is of length $k$, then the assignment of the \textit{path} list has a computational cost of $\mathcal{O}(k^2)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity would be $\mathcal{O}(N^2)$.
 
-For my code in \textit{searchPKR2}, I introduce the \textit{parents} dictionary in a similar way to \textit{searchGPT}. Then if the target is found, a \textit{path} list is created from the \textit{parent} dictionary. Unlike \textit{searchGPT}, \textit{searchPKR2} begins with the target node and appends each parent to the end of the list until the source node is reached, then reverses the list. Suppose the path is of length $k$, then the looped \textit{append} function has a cost of $\mathcal{O}(k)$, followed by a \textit{reverse} function with a cost of $\mathcal{O}(k)$, so overall the computational cost of the path is of $\mathcal{O}(k)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity of the \textit{path} list creation would be $\mathcal{O}(N)$. This is significantly better than \textit{searchGPT}.
+For my code in \textit{searchPKR2}, I introduce the \textit{parents} dictionary in a similar way to \textit{searchGPT}. If the target node is found, a \textit{path} list is also then created from the \textit{parent} dictionary. However, unlike \textit{searchGPT}, \textit{searchPKR2} begins with the target node and appends each parent to the end of the list until the source node is reached, then reverses the list. Suppose the path is of length $k$, then the looped \textit{append} function has a cost of $\mathcal{O}(k)$, followed by a \textit{reverse} function with a cost of $\mathcal{O}(k)$, so overall the computational cost of the path is of $\mathcal{O}(k)$. In the worst-case scenario, this path includes all nodes of the graph, so the time complexity of the \textit{path} list creation would be $\mathcal{O}(N)$. This is significantly better than \textit{searchGPT}.
 
 
 %---------------- End Part 1 -------------------
@@ -70,7 +74,7 @@ To efficiently compute the solution to the IVP, I use the \textit{scipy.integrat
 \label{fig1}
 \end{figure}
 
-From Figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$, the values converge towards $1$ at around $t=30$ and diverge away from its nearby equilibrium. 
+From Figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$, the values converge towards $1$ at around $t=25$ and diverge away from its nearby equilibrium. 
 
 \begin{figure}[h!]
 \centering
@@ -81,7 +85,7 @@ From Figure \ref{fig1}, we observe that from initial condition $\mathbf{y_{0A}}$
 \label{fig2}
 \end{figure}
 
-From Figure \ref{fig2}, we observe that from initial condition $\mathbf{y_{0B}}$, the values remain stable and close to the initial condition throughout. 
+From Figure \ref{fig2}, we observe that with the initial condition $\mathbf{y_{0B}}$, the values remain stable and close to the initial condition throughout. 
 
 We assume that each initial condition $\mathbf{y_{0A}}$ and $\mathbf{y_{0B}}$ is ``close'' to an equilibrium point, so by applying \textit{scipy.optimize.root} onto the ODEs with initial guesses being the initial conditions, we find the equilibrium states $\overline{\mathbf{y_A}}$ and $\overline{\mathbf{y_B}}$. 
 
@@ -132,6 +136,23 @@ We find $c_i, i=1, \cdots, n$ that satisfy the initial conditions $\mathbf{y}_0$
 
 where $\mathbf{V}$ is a $n \times n$ matrix with columns as the eigenvectors, and $\mathbf{c}$ is a column vector of $c_i$.
 
+\noindent
+When applying the perturbation analysis to the equilibrium points $\overline{\mathbf{y_A}}$ and $\overline{\mathbf{y_B}}$ with initial values $\mathbf{y_{0A}}$ and $\mathbf{y_{0B}}$, we get the following results:
+
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        & \textbf{$\overline{\mathbf{y_A}}$} & \textbf{$\overline{\mathbf{y_B}}$} \\
+        \hline
+        $\lambda_{\max}$ & 0.3582534659916265 & 2.1646883070509115e-08 \\
+        $\lambda_{\min}$ & -4052.676267072026 & -4054.7764873427172 \\
+        \hline
+    \end{tabular}
+    \caption{Notable eigenvalues of $\mathbf{M_{\bar{y}}}$}
+    \label{tab:evals}
+\end{table}
+
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
@@ -141,7 +162,7 @@ where $\mathbf{V}$ is a $n \times n$ matrix with columns as the eigenvectors, an
 \label{fig3}
 \end{figure}
 
-From Figure \ref{fig3}, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_A}}$ appear to initially converge before diverging at around $t=$, which shows it is unstable. The
+From Figure \ref{fig3}, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_A}}$ appear to initially converge quickly before diverging at around $t=25$, which shows it is unstable. This is supported by Table \ref{tab:evals}, where $\lambda_{\max}$ is positive and $\lambda_{\min}$ is negative, indicating that it is a saddle point.
 
 \begin{figure}[h!]
 \centering
@@ -152,10 +173,23 @@ From Figure \ref{fig3}, we observe that perturbations from the equilibrium point
 \label{fig4}
 \end{figure}
 
-From Figure \ref{fig4}, perturbations from the equilibrium point $\overline{\mathbf{y_B}}$ appear to converge very quickly, which indicates it is stable for at least $t <= 40$.
+From Figure \ref{fig4}, we observe that perturbations from the equilibrium point $\overline{\mathbf{y_B}}$ appear to converge very quickly, which indicates it is stable for at least $t \leq 40$. Table \ref{tab:evals} suggests that $\lambda_{\max}$ is positive but of order $10^{-8}$ and $\lambda_{\min}$ is negative, so either the equilibrium point is saddle and will diverge for big enough $t$, or because the error tolerance of \textit{part2q1new} is $10^{-6}$, the true value of $\lambda_{\max}$ is $0$ and the point is stable.
 
 \subsubsection*{3.}
 %Place your discussion for question 3 here}
+Our initial value for the stochastic differential equations are \[
+    \mathbf{y_0} = 
+    \begin{pmatrix}
+        0.3 \\
+        0.4 \\
+        0.5
+    \end{pmatrix}
+\]
+and we consider each solution for 1000 timesteps until $t=10$, so $\delta t = 0.01$. We consider cases forWe take the average of over 1000 simulations of the solution for each value of $mu$.
+
+From the first figure, we observe that when $\mu = 0$, without the Brownian motion randomness, our solution quickly converges to 1 for all initial starting points. When $\mu = 0.2$, the solution appears to converge to a value below $1$, and when $\mu = 0.4$, the solution appears to converge to 0. This is due to the fact that increasing $\mu$ means the stochastic component of the SDE dominates the deterministic part more, hence the solutions fluctuate more around the average of the $0$ mean Normal distribution.
+
+From the second figure, we observe that the greater the 
 
 %Add additional figures if needed
 %---------------- End Part 2 -------------------
