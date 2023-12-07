@@ -5,6 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 #use scipy as needed
+import scipy
+from scipy import sparse as sp
+import time
 
 #===== Code for Part 1=====#
 
@@ -24,8 +27,18 @@ def plot_field(lat,lon,u,time,levels=20):
     plt.grid()
     plt.xlabel('longitude')
     plt.ylabel('latitude')
-    
+
     return None
+
+def plot_field2(lat,lon,u, time_points,levels=20):
+    fig, ax = plt.subplots(len(time_points), 1)
+    
+    for i, t in enumerate(time_points):
+        ax[i].contourf(lon, lat, u[t,:,:], levels)
+        ax[i].axis('equal')
+        ax[i].grid()
+        ax[i].set_xlabel('longitude')
+        ax[i].set_ylabel('latitude')
 
 
 def part1():#add input if needed
@@ -34,16 +47,67 @@ def part1():#add input if needed
     """ 
 
     #--- load data ---#
-    d = np.load('data1.npz')
+    d = np.load(r'Project 3\data1.npz')
     lat = d['lat'];lon = d['lon'];u=d['u']
     #-------------------------------------#
 
     #Add code here 
 
+    L, M, N = u.shape # L = 365, M = 16, N = 144
+
+    A = u.reshape(L, M * N).T
+    A_bar = np.mean(A, axis=1)
+    A -= A_bar[:, None]  #   A ((M x N) x L) is u unrolled into L columns of length M x N vectors
+
+    U, S, WT = np.linalg.svd(A, full_matrices=False)     #   Getting U ((M x N) x L) and S (L)
+    rank = S[S>1e-11].size
+    print(f'rank A: {rank}')  
+
+    k = rank      #  How many principal components?
+    
+    Atilde = np.dot(U[:, :k].T, A)     #   Atilde (k x N) our new variables 
+
+    #   Reconstruction
+
+    A_PCA = np.dot(U[:, :k], Atilde)     #   A_pca ((M x N) x L) reconstruction of A
+    A_PCA += A_bar[:, None]
+    utilde = A_PCA.T.reshape(L, M, N)
+
+    #   PLOTS
+
+    plot_field2(lat, lon, u, np.linspace(0, 364, 5, dtype=int))
+
+    #   Singular values
+    plt.figure()
+    plt.semilogy(S[:-1])
+
+    #   Spatial patterns
+    # plt.figure()
+    # plt.imshow(U[:,0].reshape((M, N)), cmap='bwr', interpolation='nearest')
+    plot_field2(lat, lon, U.T.reshape((L, M, N)), np.arange(0, 5))
+
+    #   Temporal trends
+    plt.figure()
+    plt.plot(Atilde[0])
+    plt.plot(Atilde[1])
+
+    #   Reconstruction
+    plot_field2(lat, lon, utilde, np.linspace(0, 364, 5, dtype=int))
+
+    #   PC2 vs PC1
+    plt.figure()
+    plt.scatter(Atilde[0], Atilde[1])
+    
+    # fig, axs = plt.subplots(3, 3, figsize = (15, 15))
+    # for i, ax in enumerate(axs.reshape(-1)):
+    #     ax.contourf(lon,lat,utilde[i,:,:], 20)
+    #     ax.axis('equal')
+    #     ax.grid()
+
+    
+    plt.show()
 
     return None #modify if needed
-
-
 
 #===== Code for Part 2=====#
 def part2(f,method=2):
@@ -72,6 +136,17 @@ def part2(f,method=2):
 
         #add code here
 
+        #   Using sparse
+        A = sp.diags([[alpha]*(m-3) + [0], 1, [0] + [alpha]*(m-3)], [-1,0,1]).toarray()
+
+        diag0 = [a_bc]+[a/2]*(m-3)+[b_bc]
+        diag1 = [b/2]*(m-3)+[c_bc]
+        diag2 = [0]*(m-4)+[d_bc]
+
+        B = sp.diags([diag2, diag1, diag0, diag0[::-1], diag1[::-1], diag2[::-1]], [-2, -1,0,1,2, 3], shape=(m-1,m)).toarray()
+
+        fI = np.linalg.solve(A, B @ f)
+
     return fI #modify as needed
 
 def part2_analyze():
@@ -80,15 +155,59 @@ def part2_analyze():
     """
 
     #----- Code for generating grid, use/modify/discard as needed ----#
-    n,m = 50,40 #arbitrary grid sizes
+    n,m = 100,100 #arbitrary grid sizes
     x = np.linspace(0,1,n)
     y = np.linspace(0,1,m)
     xg,yg = np.meshgrid(x,y)
     dy = y[1]-y[0]
     yI = y[:-1]+dy/2 #grid for interpolated data
-    #--------------------------------------------#
+    #--------------------------------------------# 
 
     #add code here
+
+    xIg, yIg = np.meshgrid(x, yI)
+
+    def testing_and_plots(func):
+        f = func(xg, yg)
+        fI = func(xIg, yIg)
+
+        t = time.time()
+        fI1 = part2(f, method=1)
+        t1 = time.time()-t
+
+        t = time.time()
+        fI2 = part2(f, method=2)
+        t2 = time.time()-t
+
+        print(t1)
+        print(t2)
+
+        error1 = abs(fI1-fI)
+        RMSE1 = np.mean(error1**2)
+        print(RMSE1)
+        error2 = abs(fI2-fI)
+        RMSE2 = np.mean(error2**2)
+        print(RMSE2)
+
+        fig, ax = plt.subplots(1, 3)
+        im0 = ax[0].pcolormesh(xg, yg, f)
+        im1 = ax[1].pcolormesh(xIg, yIg, error1)
+        ax[2].pcolormesh(xIg, yIg, error2, vmin=im1.get_clim()[0], vmax=im1.get_clim()[1])
+        fig.colorbar(im0)
+        fig.colorbar(im1, ax=[ax[1], ax[2]])
+        plt.show()
+
+    testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y))
+    testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y) + np.where(y < 0.5, 0, 0.5))
+   
+    #   Plots
+
+    # fig, ax = plt.subplots(1, 4)
+    # ax[0].pcolormesh(xg, yg, f1)
+    # ax[1].pcolormesh(xIg, yIg, f1I)    
+    # ax[2].pcolormesh(xIg, yIg, f1I1)
+    # ax[3].pcolormesh(xIg, yIg, f1I2)  
+    # plt.show()
 
     return None #modify as needed
 
@@ -163,7 +282,7 @@ def part3_analyze(display = False):#add/remove input variables if needed
     y0[:n]=1+0.2*np.cos(4*k*a0)+0.3*np.sin(7*k*a0)+0.1*A0.real
 
     #---Example code for computing solution, use/modify/discard as needed---#
-    c = 0.5
+    c = 1.3
     t,y = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
     y0 = y[-1,:]
     t,y = part3q1(y0,alpha,beta,b,c,method='RK45',err=1e-6)
@@ -173,15 +292,40 @@ def part3_analyze(display = False):#add/remove input variables if needed
         plt.figure()
         plt.contourf(np.arange(n),t,u,20)
 
+
     #-------------------------------------------#
 
     #Add code here
+
+    # FFT analysis
+
+    Nt_1 = len(u)
+
+    Sf = np.fft.fftshift(np.fft.fft(u, axis=0))
+    f = np.fft.fftshift(np.fft.fftfreq(Nt_1, t[1]-t[0]))
+
+    # Plots
+    
+    plt.figure()
+    for i in range(n):
+        plt.plot(t, u[:,i])
+
+    plt.figure()
+    Nt_1 = len(u)
+    for j in range(Nt_1):
+        plt.plot(np.arange(n), u[j])
+
+    plt.figure()
+    plt.plot(f, Sf[:, 0])
+
+    plt.show()
 
 
     return None #modify if needed
 
 
 def part3q2(x,c=1.0):
+
     """
     Code for part 3, question 2
     """
@@ -216,3 +360,5 @@ def part3q2(x,c=1.0):
 if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
+
+    part2_analyze()
