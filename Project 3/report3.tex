@@ -7,7 +7,7 @@
 \usepackage{amssymb}
 \newcommand{\trm}{\textrm}
 \newcommand{\pa}{\partial}
-\author{\emph{Your college ID here}}
+\author{\emph{02027072}}
 
 \usepackage{graphicx}
 
@@ -22,13 +22,31 @@
 \subsection*{Part 1}
 %place discussion for Part 1 here
 
+We begin by reshaping $u$ into a $2304 \times 365$ \textit{NumPy} array, with each day as a datapoint in the columns, and locations (longitude and latitude combinations) as the attributes in the rows, and we apply PCA to it.
+
+When applying PCA, we note that the number of non-zero singular values is 364, which shows that the matrix $A$ is not full rank as we have 365 days. 
+
+Figure \ref{} shows the first ?? principal components, i.e. the directions in which the highest variance in wind speed is captured.
+
+From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+
+We see from Figure \ref{} that there is a general positive correlation in wind speed between subsequent days. 
+
+We then transpose our array into a $365 \times 2304$ \textit{NumPy} array, now treating the locations as the datapoints, and each day as an attribute. 
+
+Figure \ref{} shows the first ?? principal components, i.e. the values in time that capture the most variance. 
+
+From figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+
+From \ref{}, we 
+
 \begin{figure}[h!]
 \centering
 %Uncomment line below to display figure saved as fig1.png
-%\includegraphics[width=0.8\textwidth]{fig1.png}
+includegraphics[width=0.8\textwidth]{fig1.png}
 
-\caption{Add figure description here}
-\label{fig1}
+\caption{Retained Variance}
+\label{fig_var1}
 \end{figure}
 
 %---------------- End Part 1 -------------------
@@ -40,7 +58,45 @@
 
 \subsubsection*{2.}
 %Place your discussion for question 2 here}
+For method 2, we solve the system of linear equations
+\[
+    \mathbf{A\tilde{f}} = \mathbf{Bf}
+\]
+for $\mathbf{\tilde{f}}$ with columns $\mathbf{\tilde{f}}_j = (\tilde{f}_{1/2,j}, \dots, \tilde{f}_{m-3/2,j})^\top$, where
+\[
+    \mathbf{A} = 
+    \begin{pmatrix}
+        1 \\
+        \alpha & 1 & \alpha \\
+        & \ddots & \ddots & \ddots \\
+        && \alpha & 1 & \alpha \\
+        &&&& 1
+    \end{pmatrix}
+\]
+\[
+    \mathbf{B} = 
+    \begin{pmatrix}
+        \tilde{a} & \tilde{b} & \tilde{c} & \tilde{d} \\
+        \frac{b}{2} & \frac{a}{2} & \frac{a}{2} & \frac{b}{2} \\
+        & \ddots & \ddots & \ddots & \ddots\\
+        && \frac{b}{2} & \frac{a}{2} & \frac{a}{2} & \frac{b}{2} \\
+        && \tilde{d} & \tilde{c} & \tilde{b} & \tilde{a}
+    \end{pmatrix}
+\]
+and the columns of $\mathbf{f}$ are $\mathbf{f}_j = (f_{0,j}, \dots, f_{m-1,j})^\top$. 
 
+To solve this linear equation efficiently, we convert matrix $\mathbf{A}$ to ``matrix diagonal ordered form'' and then apply \textit{scipy.linalg.solve\_banded}.
+
+We run both methods on various functions:
+\begin{itemize}
+    \item Franke's function
+    \begin{align*}
+        f(x, y) = & 0.75 \exp\left(-\frac{(9x - 2)^2}{4} - \frac{(9y - 2)^2}{4}\right) + 0.75 \exp\left(-\frac{(9x + 1)^2}{49} - \frac{(9y + 1)}{10}\right) \\
+        & + 0.5 \exp\left(-\frac{(9x - 7)^2}{4} - \frac{(9y - 3)^2}{4}\right) - 0.2 \exp\left(-\frac{(9x - 4)^2}{49} - \frac{(9y - 7)^2}{10}\right)
+    \end{align*}
+\end{itemize}
+
+To determine the accuracy, cost and efficiency of both methods, we apply them to each function and measure the wall times and RMSE (Root Mean Square Error). 
 
 \begin{figure}[h!]
 \centering
@@ -59,8 +115,16 @@
 \subsubsection*{1.}
 %Place your discussion for question 1 here}
 
+
 \subsubsection*{2.}
 %Place your brief discussion for question 2 here}
+The 4 lines of code in function \textit{part3q2} apply principal component analysis to the solution matrix $\mathbf{A}$, then return a lower dimensional approximate reconstruction of $\mathbf{A}$, along with the error of the reconstruction. 
+\begin{enumerate}
+    \item The first line retrieves the principal components of $\mathbf{A}$ efficiently by finding $\mathbf{v_1}$, the eigenvectors of the covariance matrix $\mathbf{A}^\top\mathbf{A}$, using \textit{np.linalg.eigh}. Calculating the covariance matrix and its eigenvalues is computationally faster than the SVD algorithms we use in \textit{part1} for PCA, however, it is more memory-intensive and numerically unstable.
+    \item The second line calculates $\mathbf{v_2}$, the transformed data matrix, by transforming $\mathbf{A}$ into the space spanned by the principal components using matrix multiplication.
+    \item The third line uses the first $x$ columns of the transformed data matrix, along with the first $x$ principal components, to reconstruct the $x$-dimensional approximation of $A$. This again uses matrix multiplication
+    \item The last line calculates the square error of the reconstruction efficiently using \textit{NumPy} vectorised operations.
+\end{enumerate}   
 
 \begin{figure}[h!]
 \centering
