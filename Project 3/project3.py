@@ -41,14 +41,16 @@ def plot_field(lat,lon,u,time,levels=20):
 
 def plot_field2(lat,lon,u, time_points,levels=20):
     fig, ax = plt.subplots(len(time_points), 1)
+    cmap = plt.cm.get_cmap('viridis')
     
     for i, t in enumerate(time_points):
-        ax[i].contourf(lon, lat, u[t,:,:], levels)
-        ax[i].axis('equal')
+        contour = ax[i].contourf(lon, lat, u[t,:,:], levels)
+        ax[i].set_aspect('equal')
         ax[i].grid()
         ax[i].set_xlabel('longitude')
         ax[i].set_ylabel('latitude')
 
+    fig.colorbar(contour, ax=ax, orientation='vertical')
 
 def part1(time_as_datapoints = True):#add input if needed
     """
@@ -69,8 +71,8 @@ def part1(time_as_datapoints = True):#add input if needed
 
     def PCA(A, k=0):
         """
-        Run PCA on A
-        
+        Apply principal component analysis to A using SVD
+
         Input:
         A: p x N row-centered matrix, where p is number of features/attributes, N is number of data points
         k: number of principal components (default=0 uses rank of A)
@@ -79,16 +81,16 @@ def part1(time_as_datapoints = True):#add input if needed
         S: length k array, singular values
         Atilde: k x N matrix, transformed data
         """
-        U, S, WT = np.linalg.svd(A, full_matrices=False)     #   Getting U ((M x N) x L) and S (L)
-        rank = S[S>1e-11].size
+        U, S, WT = np.linalg.svd(A, full_matrices=False)  # Find singular values and principal components using SVD
+        rank = S[S>1e-11].size  # Find rank of A by checking number of non-zero singular values
         print(f'rank A: {rank}')  
 
-        if k == 0:
+        if k == 0:  # If k is not specified, we use the rank of A
             k = rank
 
-        PC = U[:, :k].T  #  Principal components
-        
-        Atilde = PC @ A     #   New variables
+        PC = U[:, :k].T  # Principal components
+
+        Atilde = PC @ A  # Transformed data
         return S[:k], PC, Atilde
     
     if time_as_datapoints:
@@ -97,7 +99,8 @@ def part1(time_as_datapoints = True):#add input if needed
         A = u.reshape(L, M * N).T  # A ((M x N) x L) is u unrolled into L columns of length M x N vectors
         A_bar = np.mean(A, axis=1)
         A -= A_bar[:, None]   # Centering the rows of A
-        S, PC, Atilde = PCA(A)
+        k = L
+        S, PC, Atilde = PCA(A, k)
 
         # #   Reconstruction
         # A_red = PC.T @ Atilde     #   A_red ((M x N) x L) reconstruction of A
@@ -109,39 +112,50 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.figure()
         plt.title('Singular values')
         plt.semilogy(S)
-
-        #   Principal components (along space)
-        # plt.figure()
-        # plt.imshow(U[:,0].reshape((M, N)), cmap='bwr', interpolation='nearest')
-        plot_field2(lat, lon, PC.reshape((364, M, N)), np.arange(0, 5))
-
-        #   Temporal trends (plotting rows of Atilde)
-        plt.figure()
-        plt.plot(Atilde[0], label = 'PC1')
-        plt.plot(Atilde[1], label = 'PC2')
-        plt.legend()
-
-        #   Fourier on temporal trends
-        plt.figure()
-        mode = np.arange(-L//2, L//2)
-        spect1 = abs(fft.fftshift(fft.fft(Atilde[0])))
-        spect2 = abs(fft.fftshift(fft.fft(Atilde[1])))
-        plt.semilogy(mode, spect1)
-        plt.semilogy(mode, spect2)
-
-        plt.figure()
-        freq, welch1 = scipy.signal.welch(Atilde[0])
-        plt.semilogy(freq, welch1)
+        plt.ylabel('Singular value')
+        plt.xlabel('Principal Component')
 
         #   Explained variance
         cum_var_rat = np.cumsum(S**2/np.sum(S**2))
 
         plt.figure()
         plt.plot(cum_var_rat[:50])
-        plt.axhline(y=1, color='r')
+        plt.axhline(y=1, color='r', label='Total Variance')
         plt.axhline(y=0.8, color='k', linestyle='--')
+        plt.ylabel('% explained variance')
+        plt.xlabel('Principal Component')
 
-        #   PC2 vs PC1
+        # # Principal components (along space)
+        # plt.figure()
+        # plt.imshow(U[:,0].reshape((M, N)), cmap='bwr', interpolation='nearest')
+        plot_field2(lat, lon, PC.reshape((k, M, N)), np.arange(0, 3))
+        # plot_field(lat, lon, PC.reshape((k, M, N)), 0)
+
+        #   Temporal trends (plotting rows of Atilde)
+        plt.figure()
+        plt.plot(Atilde[0], label = 'PC1')
+        plt.plot(Atilde[1], label = 'PC2')
+        plt.xlabel('Day')
+        plt.ylabel('Projection along PC')
+        plt.legend()
+
+        #  Correlation between subsequent days
+        plt.figure()
+        plt.scatter(Atilde[0][:-1], Atilde[0][1:])
+        plt.scatter(Atilde[1][:-1], Atilde[1][1:])
+
+        #   Fourier on temporal trends
+        plt.figure()
+        mode = np.arange(-L//2, L//2)
+        spect1 = abs(fft.fftshift(fft.fft(Atilde[0])))
+        freq = fft.fftshift(fft.fftfreq(L))
+        plt.semilogy(freq[L//2:], spect1[L//2:])
+
+        # plt.figure()
+        freq, welch1 = scipy.signal.welch(Atilde[0])
+        plt.semilogy(freq, welch1)
+
+        # # PC2 vs PC1
         # plt.figure()
         # plt.scatter(Atilde[0], Atilde[1])
 
@@ -160,25 +174,45 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.figure()
         plt.title('Singular values')
         plt.semilogy(S)
+        plt.ylabel('Singular value')
+        plt.xlabel('Principal Component')
 
         #   Explained variance
         cum_var_rat = np.cumsum(S**2/np.sum(S**2))
-        
+
         plt.figure()
         plt.plot(cum_var_rat[:50])
         plt.axhline(y=1, color='r')
         plt.axhline(y=0.8, color='k', linestyle='--')
+        plt.ylabel('% explained variance')
+        plt.xlabel('Principal Component')
 
         #   Principal components (along time)  # Note they are negative
         plt.figure()
         plt.plot(PC[0], label = 'PC1')
         plt.plot(PC[1], label = 'PC2')
+        plt.xlabel('Day')
         plt.legend()
 
         #   Spatial patterns (plotting rows of Atilde)
+        plot_field2(lat, lon, Atilde.reshape((L, M, N)), np.arange(0,3))
+
+        fig, ax = plt.subplots(3, 1)
+        cmap = plt.cm.get_cmap('viridis')
+        
+        for i in range(3):
+            contour = ax[i].contourf(lon, lat, Atilde.reshape((L, M, N))[i,:,:], 20)
+            ax[i].set_aspect('equal')
+            ax[i].grid()
+            ax[i].set_title(f'PC{i+1}')
+            ax[i].set_xlabel('longitude')
+            ax[i].set_ylabel('latitude')
+
+        fig.colorbar(contour, ax=ax, orientation='vertical')
+
+        # #   PC1 vs PC2
         # plt.figure()
-        # plt.imshow(U[:,0].reshape((M, N)), cmap='bwr', interpolation='nearest')
-        plot_field(lat, lon, Atilde.reshape((L, M, N)), 0)
+        # plt.scatter(Atilde[0], Atilde[1])
 
         plt.show()
 
@@ -295,6 +329,7 @@ def part2_analyze():
                                (3/4) * np.exp(-((9*x+1)**2)/49 - ((9*y+1)**2)/10) + \
                                (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
                                (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2)))
+    testing_and_plots(lambda x, y: (1-x)**2 + 100*(y-x**2)**2)
     
     return None #modify as needed
 
@@ -477,8 +512,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    # part1(time_as_datapoints=True)
+    part1(time_as_datapoints=True)
     # part2_analyze()
     # part3_analyze()
-
-    print(part3q2())
