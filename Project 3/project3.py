@@ -124,6 +124,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.axhline(y=0.8, color='k', linestyle='--')
         plt.ylabel('% explained variance')
         plt.xlabel('Principal Component')
+        plt.legend()
 
         # Principal components (along space)
         fig, ax = plt.subplots(3, 1)
