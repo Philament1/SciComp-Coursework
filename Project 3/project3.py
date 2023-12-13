@@ -522,6 +522,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    part1(time_as_datapoints=True)
+    part1(time_as_datapoints=False)
     # part2_analyze()
     # part3_analyze()
