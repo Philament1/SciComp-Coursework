@@ -26,11 +26,32 @@ We begin by reshaping $u$ into a $2304 \times 365$ \textit{NumPy} array, with ea
 
 When applying PCA, we note that the number of non-zero singular values is 364, which shows that the matrix $A$ is not full rank as we have 365 days. 
 
-Figure \ref{} shows the first ?? principal components, i.e. the directions in which the highest variance in wind speed is captured.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{fig_pc1.png}
+\caption{First 3 PCs}
+\label{fig_pc1}
+\end{figure}
+
+Figure \ref{fig_pc1} shows the first ?? principal components, i.e. the directions in which the highest variance in wind speed is captured.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{fig_var1.png}
+\caption{Cumulative retained variance of PCs}
+\label{fig_var1}
+\end{figure}
 
 From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around ?? principal components. 
 
-We see from Figure \ref{} that there is a general positive correlation in wind speed between subsequent days. 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_proj1.png}
+\caption{Subsequent days of PC1}
+\label{fig_proj1}
+\end{figure}
+
+We see from Figure \ref{fig_proj1} that there is a general positive correlation in wind speed between subsequent days. 
 
 We then transpose our array into a $365 \times 2304$ \textit{NumPy} array, now treating the locations as the datapoints, and each day as an attribute. 
 
@@ -39,13 +60,6 @@ Figure \ref{} shows the first ?? principal components, i.e. the values in time t
 From Figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
 
 From \ref{}, we 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\textwidth]{fig_var1.png}
-\caption{Add figure description here}
-\label{fig_var1}
-\end{figure}
 
 %---------------- End Part 1 -------------------
 
