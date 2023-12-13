@@ -125,10 +125,17 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.ylabel('% explained variance')
         plt.xlabel('Principal Component')
 
-        # # Principal components (along space)
-        # plt.figure()
-        # plt.imshow(U[:,0].reshape((M, N)), cmap='bwr', interpolation='nearest')
-        plot_field2(lat, lon, PC.reshape((k, M, N)), np.arange(0, 3))
+        # Principal components (along space)
+        fig, ax = plt.subplots(3, 1)
+        for i in range(3):
+            contour = ax[i].contourf(lon, lat, PC.reshape((k, M, N))[i,:,:], 20)
+            ax[i].set_aspect('equal')
+            ax[i].grid()
+            ax[i].set_title(f'PC{i+1}')
+            ax[i].set_xlabel('longitude')
+            ax[i].set_ylabel('latitude')
+        fig.colorbar(contour, ax=ax, orientation='vertical')
+
         # plot_field(lat, lon, PC.reshape((k, M, N)), 0)
 
         #   Temporal trends (plotting rows of Atilde)
@@ -141,8 +148,11 @@ def part1(time_as_datapoints = True):#add input if needed
 
         #  Correlation between subsequent days
         plt.figure()
-        plt.scatter(Atilde[0][:-1], Atilde[0][1:])
-        plt.scatter(Atilde[1][:-1], Atilde[1][1:])
+        plt.scatter(Atilde[0][:-1], Atilde[0][1:], marker='x', label='Projection along PC1')
+        plt.scatter(Atilde[1][:-1], Atilde[1][1:], label='Projection along PC2')
+        plt.xlabel('Value at day t')
+        plt.ylabel('Value at day t+1')
+        plt.legend()
 
         #   Fourier on temporal trends
         plt.figure()
@@ -195,7 +205,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.legend()
 
         #   Spatial patterns (plotting rows of Atilde)
-        plot_field2(lat, lon, Atilde.reshape((L, M, N)), np.arange(0,3))
+        # plot_field2(lat, lon, Atilde.reshape((L, M, N)), np.arange(0,3))
 
         fig, ax = plt.subplots(3, 1)
         cmap = plt.cm.get_cmap('viridis')
@@ -204,10 +214,9 @@ def part1(time_as_datapoints = True):#add input if needed
             contour = ax[i].contourf(lon, lat, Atilde.reshape((L, M, N))[i,:,:], 20)
             ax[i].set_aspect('equal')
             ax[i].grid()
-            ax[i].set_title(f'PC{i+1}')
+            ax[i].set_title(f'Projection along PC{i+1}')
             ax[i].set_xlabel('longitude')
             ax[i].set_ylabel('latitude')
-
         fig.colorbar(contour, ax=ax, orientation='vertical')
 
         # #   PC1 vs PC2
