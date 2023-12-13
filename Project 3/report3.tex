@@ -22,18 +22,13 @@
 \subsection*{Part 1}
 %place discussion for Part 1 here
 
-\begin{figure}[h!]
-\centering
-%Uncomment line below to display figure saved as fig1.png
-%\includegraphics[width=0.8\textwidth]{fig1.png}
-
 We begin by reshaping $u$ into a $2304 \times 365$ \textit{NumPy} array, with each day as a datapoint in the columns, and locations (longitude and latitude combinations) as the attributes in the rows, and we apply PCA to it.
 
 When applying PCA, we note that the number of non-zero singular values is 364, which shows that the matrix $A$ is not full rank as we have 365 days. 
 
 Figure \ref{} shows the first ?? principal components, i.e. the directions in which the highest variance in wind speed is captured.
 
-From Figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around ?? principal components. 
 
 We see from Figure \ref{} that there is a general positive correlation in wind speed between subsequent days. 
 
@@ -41,12 +36,15 @@ We then transpose our array into a $365 \times 2304$ \textit{NumPy} array, now t
 
 Figure \ref{} shows the first ?? principal components, i.e. the values in time that capture the most variance. 
 
-From figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+From Figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
 
 From \ref{}, we 
 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_var1.png}
 \caption{Add figure description here}
-\label{fig1}
+\label{fig_var1}
 \end{figure}
 
 %---------------- End Part 1 -------------------
