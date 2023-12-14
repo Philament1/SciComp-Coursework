@@ -5,6 +5,7 @@
 \usepackage{minted}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{placeins}
 \newcommand{\trm}{\textrm}
 \newcommand{\pa}{\partial}
 \author{\emph{Your college ID here}}
@@ -46,23 +47,54 @@ From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retain
 
 \begin{figure}[h!]
 \centering
+\includegraphics[width=0.8\textwidth]{fig_proj1c.png}
+\caption{FFT and Welch's on projection onto PC1}
+\label{fig_proj1c}
+\end{figure}
+
+From Figure \ref{fig_proj1c}, we see there are no dominant frequencies in both spectral density estimates. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
+
+\begin{figure}[h!]
+\centering
 \includegraphics[width=0.8\textwidth]{fig_proj1.png}
-\caption{Subsequent days of PC1}
-\label{fig_proj1}
+\caption{Subsequent days of PC1 and PC2}
+\label{fig_proj1b}
 \end{figure}
 
 We see from Figure \ref{fig_proj1} that there is a general positive correlation in wind speed between subsequent days. 
 
 We then transpose our array into a $365 \times 2304$ \textit{NumPy} array, now treating the locations as the datapoints, and each day as an attribute. 
 
-Figure \ref{} shows the first ?? principal components, i.e. the values in time that capture the most variance. 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_pc2.png}
+\caption{First 2 Principal Components}
+\label{fig_pc2}
+\end{figure}
 
-From Figure \ref{}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+Figure \ref{fig_pc2} shows the first 2 principal components, i.e. the values in time that capture the most variance. 
 
-From \ref{}, we 
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.5\textwidth]{fig_var2.png}
+\caption{Cumulative retained variance of PCs}
+\label{fig_var2}
+\end{figure}
+
+From Figure \ref{fig_var2}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{fig_proj2.png}
+\caption{Projected values of first 3 principal components}
+\label{fig_proj2}
+\end{figure}
+
+From \ref{fig_proj2}, we see a large variation in scores between the higher and lower latitudes, indicating great differences in windspeeds between the upper and lower halves of the map. The second and third principal components also show clusters of locations where the scores are similar, showing patterns in space.
 
 %---------------- End Part 1 -------------------
 
+\FloatBarrier
 \vspace{0.25in}
 
 %---------------- Part 2  -------------------
@@ -99,16 +131,49 @@ and the columns of $\mathbf{f}$ are $\mathbf{f}_j = (f_{0,j}, \dots, f_{m-1,j})^
 
 To solve this linear equation efficiently, we convert matrix $\mathbf{A}$ to ``matrix diagonal ordered form'' and then apply \textit{scipy.linalg.solve\_banded}.
 
-We run both methods on various functions:
+We run both methods on the following functions:
 \begin{itemize}
-    \item Franke's function
+    \item \textit{Oscillating function}
+    \[
+        f(x, y) = \sin(2\pi x)\cos(2\pi y)
+    \]
+    \item \textit{Franke's function - used as a test function for interpolation problems}
     \begin{align*}
         f(x, y) = & 0.75 \exp\left(-\frac{(9x - 2)^2}{4} - \frac{(9y - 2)^2}{4}\right) + 0.75 \exp\left(-\frac{(9x + 1)^2}{49} - \frac{(9y + 1)}{10}\right) \\
         & + 0.5 \exp\left(-\frac{(9x - 7)^2}{4} - \frac{(9y - 3)^2}{4}\right) - 0.2 \exp\left(-\frac{(9x - 4)^2}{49} - \frac{(9y - 7)^2}{10}\right)
     \end{align*}
+    
 \end{itemize}
 
-To determine the accuracy, cost and efficiency of both methods, we apply them to each function and measure the wall times and RMSE (Root Mean Square Error). 
+To determine the accuracy, cost and efficiency of both methods, we apply them to each function and measure the average wall times (over 1000 runs) and RMSE (Root Mean Square Error). 
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+     & RMSE Method 1 & RMSE Method 2 \\
+    \hline
+    Oscillating function & 2.5761873814328875e-06 & 1.8641643487025784e-11 \\
+    Franke's function & 4.884560478922877e-07 & 9.545519469236035e-12 \\
+    \hline
+  \end{tabular}
+  \caption{RMSE}
+  \label{tab:part2_RMSE}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+     & Mean Wall Time (s) Method 1 & Mean Wall Time (s) Method 2 \\
+    \hline
+    Oscillating function & 7.0264339447021485e-06 & 0.0002693333625793457 \\
+    Franke's function & 6.220340728759766e-06 & 0.00034125757217407226 \\
+    \hline
+  \end{tabular}
+  \caption{Wall Times}
+  \label{tab:part2_walltimes}
+\end{table}
 
 \begin{figure}[h!]
 \centering
@@ -121,6 +186,7 @@ To determine the accuracy, cost and efficiency of both methods, we apply them to
 
 %Add additional figure if needed
 %---------------- End Part 2 -------------------
+\FloatBarrier
 %---------------- Part 3  -------------------
 \subsection*{Part 3}
 
@@ -132,7 +198,7 @@ To determine the accuracy, cost and efficiency of both methods, we apply them to
 %Place your brief discussion for question 2 here}
 The 4 lines of code in function \textit{part3q2} apply principal component analysis to the solution matrix $\mathbf{A}$, then return a lower dimensional approximate reconstruction of $\mathbf{A}$, along with the error of the reconstruction. 
 \begin{enumerate}
-    \item The first line retrieves the principal components of $\mathbf{A}$ efficiently by finding $\mathbf{v_1}$, the eigenvectors of the covariance matrix $\mathbf{A}^\top\mathbf{A}$, using \textit{np.linalg.eigh}. Calculating the covariance matrix and its eigenvalues is computationally faster than the SVD algorithms we use in \textit{part1} for PCA, however, it is more memory-intensive and numerically unstable.
+    \item The first line retrieves the principal components of $\mathbf{A}$ efficiently by finding $\mathbf{v_1}$, the eigenvectors of the covariance matrix $\mathbf{A}^\top\mathbf{A}$, using \textit{np.linalg.eigh}. Calculating the covariance matrix and its eigenvalues is computationally faster than the SVD algorithms we use in \textit{part1} for PCA, however, it is more memory-intensive and can be numerically unstable.
     \item The second line calculates $\mathbf{v_2}$, the transformed data matrix, by transforming $\mathbf{A}$ into the space spanned by the principal components using matrix multiplication.
     \item The third line uses the first $x$ columns of the transformed data matrix, along with the first $x$ principal components, to reconstruct the $x$-dimensional approximation of $A$. This again uses matrix multiplication
     \item The last line calculates the square error of the reconstruction efficiently using \textit{NumPy} vectorised operations.
