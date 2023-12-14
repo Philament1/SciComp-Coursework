@@ -37,32 +37,43 @@ When applying PCA, we note that the number of non-zero singular values is 364, w
 Figure \ref{fig_pc1} shows the first 3 principal components, i.e. the directions in which the highest variance in wind speed is captured.
 
 \begin{figure}[h!]
-    \begin{minipage}{0.5\textwidth}
+    \begin{minipage}{0.49\textwidth}
     \centering
-    \includegraphics[width=0.5\textwidth]{fig_var1.png}
+    \includegraphics[width=\textwidth]{fig_var1.png}
     \caption{Cumulative retained variance of PCs}
     \label{fig_var1}
     \end{minipage}%
-
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_proj1.png}
+    \caption{Projections onto first 2 PCs}
+    \label{fig_proj1}
+    \end{minipage}%
 \end{figure}
 
 From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around ?? principal components. 
 
+
 \begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\textwidth]{fig_proj1c.png}
-\caption{FFT and Welch's on projection onto PC1}
-\label{fig_proj1c}
+    \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_proj1b.png}
+    \caption{FFT and Welch's on projection onto PC1}
+    \label{fig_proj1b}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig_proj1c.png}
+    \caption{Subsequent days of PC1 and PC2}
+    \label{fig_proj1c}
+    \end{minipage}%
 \end{figure}
 
 From Figure \ref{fig_proj1c}, we observe there are no dominant frequencies in both spectral density estimates, suggesting there are no consistent periodic patterns in wind speed over the year. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\textwidth]{fig_proj1b.png}
-\caption{Subsequent days of PC1 and PC2}
-\label{fig_proj1b}
-\end{figure}
+
 
 We see from Figure \ref{fig_proj1} that there is a general positive correlation in wind speed between subsequent days, supporting our idea that there are few high-frequency variations. 
 
