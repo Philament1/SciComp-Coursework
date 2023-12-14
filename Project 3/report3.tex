@@ -149,7 +149,7 @@ is a rectangular banded matrix, and the columns of $\mathbf{f}$ are $\mathbf{f}_
 
 To solve this linear equation efficiently, we convert matrix $\mathbf{A}$ to ``matrix diagonal ordered form'' and then apply \textit{scipy.linalg.solve\_banded}.
 
-We run both methods on the following functions:
+We apply both methods to the following functions on a 2-dimensional grid:
 \begin{itemize}
     \item \textit{Oscillating function}
     \[
@@ -215,8 +215,6 @@ From Table \ref{tab:part2_err}, we note that method 2 has a significantly lower 
 
 From Table \ref{tab:part2_walltimes}, we see that method 2 has significantly longer wall times, as the method has a higher computational cost due to the use of matrix multiplication and solving linear equations, in comparison to the simpler method 1.
 
-
-
 \FloatBarrier
 
 We then test both methods on Franke's function for a range of different grid sizes (always letting $n=m+10$ for consistency).
@@ -224,16 +222,20 @@ We then test both methods on Franke's function for a range of different grid siz
 \begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{fig_yerror.png}
-\caption{Mean Error against y}
+\caption{Mean Error for each $y$}
 \label{fig_yerror}
 \end{figure}
+
+In Figure \ref{fig_yerror}, we test $m=40, 80, \cdots, 160, 200$. We observe that the error is more consistent for different $y$ with method 1, whereas method 2 is significantly worse at the boundaries. Both methods are more accurate at higher $m$ values, and method 2 is consistently more accurate than method 1.
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{fig_merror.png}
-\caption{Results for Franke's function}
+\caption{Mean Error against $m$}
 \label{fig_merror}
 \end{figure}
+
+In Figure \ref{fig_merror}, we test for higher $m$ values. The error for increasing $y$ is almost exponential for both methods, with the error for method 2 decreasing at a higher rate than method 1.
 
 %Add additional figure if needed
 %---------------- End Part 2 -------------------
