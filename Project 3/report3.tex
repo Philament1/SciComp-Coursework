@@ -8,7 +8,7 @@
 \usepackage{placeins}
 \newcommand{\trm}{\textrm}
 \newcommand{\pa}{\partial}
-\author{\emph{Your college ID here}}
+\author{\emph{02027072}}
 
 \usepackage{graphicx}
 
@@ -34,7 +34,7 @@ When applying PCA, we note that the number of non-zero singular values is 364, w
 \label{fig_pc1}
 \end{figure}
 
-Figure \ref{fig_pc1} shows the first 3 principal components, i.e. the directions in which the highest variance in wind speed is captured.
+Figure \ref{fig_pc1} shows the first 3 principal components, i.e. the directions in which the highest variance in wind speed is captured. The maps show distinct zones which exhibit similar behaviour over time. 
 
 \begin{figure}[h!]
     \begin{minipage}{0.49\textwidth}
@@ -52,8 +52,9 @@ Figure \ref{fig_pc1} shows the first 3 principal components, i.e. the directions
     \end{minipage}%
 \end{figure}
 
-From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around 20 principal components and that under 20\% of the total variance is captured by the first PC. 
 
+Figure \ref{fig_proj1} shows our transformed data values as projections onto the first 2 principal components. 
 
 \begin{figure}[h!]
     \begin{minipage}{0.49\textwidth}
@@ -71,31 +72,33 @@ From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retain
     \end{minipage}%
 \end{figure}
 
-From Figure \ref{fig_proj1c}, we observe there are no dominant frequencies in both spectral density estimates, suggesting there are no consistent periodic patterns in wind speed over the year. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
+From Figure \ref{fig_proj1b}, we observe there are no dominant frequencies in both spectral density estimates, suggesting there are no consistent periodic patterns in wind speed over the year. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
 
+We see from Figure \ref{fig_proj1c} that there is a general positive correlation in wind speed between subsequent days, supporting our idea that there are few high-frequency variations. 
 
-
-We see from Figure \ref{fig_proj1} that there is a general positive correlation in wind speed between subsequent days, supporting our idea that there are few high-frequency variations. 
+\FloatBarrier
 
 We then transpose our array into a $365 \times 2304$ \textit{NumPy} array, now treating the locations as the datapoints, and each day as an attribute. 
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\textwidth]{fig_pc2.png}
-\caption{First 2 Principal Components}
-\label{fig_pc2}
-\end{figure}
 
 Figure \ref{fig_pc2} shows the first 2 principal components, i.e. the values in time that capture the most variance. 
 
 \begin{figure}[h!]
-\centering
-\includegraphics[width=0.5\textwidth]{fig_var2.png}
-\caption{Cumulative retained variance of PCs}
-\label{fig_var2}
+    \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig_pc2.png}
+    \caption{First 2 Principal Components}
+    \label{fig_pc2}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_var2.png}
+    \caption{Cumulative retained variance of PCs}
+    \label{fig_var2}
+    \end{minipage}
 \end{figure}
 
-From Figure \ref{fig_var2}, we observe that 80\% of the total variance is retained at around ?? principal components. 
+From Figure \ref{fig_var2}, we observe that 80\% of the total variance is retained at around 10 principal components, and that the first principal component captures over 50\% of the total variance. 
 
 \begin{figure}[h!]
 \centering
@@ -104,7 +107,7 @@ From Figure \ref{fig_var2}, we observe that 80\% of the total variance is retain
 \label{fig_proj2}
 \end{figure}
 
-From \ref{fig_proj2}, we see a large variation in scores between the higher and lower latitudes, indicating great differences in windspeeds between the upper and lower halves of the map. The second and third principal components also show clusters of locations where the scores are similar, showing patterns in space.
+From Figure \ref{fig_proj2}, we see a large variation in scores between the higher and lower latitudes, indicating great differences in windspeeds between the upper and lower halves of the map. The second and third principal components also show distinct zones where the scores are similar, indicating the presence of spatial clusters and patterns. 
 
 %---------------- End Part 1 -------------------
 
@@ -131,6 +134,7 @@ for $\mathbf{\tilde{f}}$ with columns $\mathbf{\tilde{f}}_j = (\tilde{f}_{1/2,j}
         &&&& 1
     \end{pmatrix}
 \]
+is a banded square matrix,
 \[
     \mathbf{B} = 
     \begin{pmatrix}
@@ -141,7 +145,7 @@ for $\mathbf{\tilde{f}}$ with columns $\mathbf{\tilde{f}}_j = (\tilde{f}_{1/2,j}
         && \tilde{d} & \tilde{c} & \tilde{b} & \tilde{a}
     \end{pmatrix}
 \]
-and the columns of $\mathbf{f}$ are $\mathbf{f}_j = (f_{0,j}, \dots, f_{m-1,j})^\top$. 
+is a rectangular banded matrix, and the columns of $\mathbf{f}$ are $\mathbf{f}_j = (f_{0,j}, \dots, f_{m-1,j})^\top$. 
 
 To solve this linear equation efficiently, we convert matrix $\mathbf{A}$ to ``matrix diagonal ordered form'' and then apply \textit{scipy.linalg.solve\_banded}.
 
@@ -159,7 +163,25 @@ We run both methods on the following functions:
     
 \end{itemize}
 
-To determine the accuracy, cost and efficiency of both methods, we apply them to each function and measure the average wall times (over 1000 runs) and RMSE (Root Mean Square Error). 
+To determine the accuracy, cost and efficiency of both methods, we apply them to each function and plot the errors as the absolute difference between the interpolated value and the actual value. We also measure the average wall times (over 1000 runs) and calculate the RMSE (Root Mean Square Error). 
+
+\FloatBarrier
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_osc.png}
+\caption{Results for oscillating function}
+\label{fig_osc}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_franke.png}
+\caption{Results for Franke's function}
+\label{fig_franke}
+\end{figure}
+
+From figures \ref{fig_osc} and \ref{fig_franke}, we observe that method 1 produces large errors at the peaks and troughs of both functions. Method 2 has a much more stable error value throughout both functions, except at the boundaries, where there is a significantly larger error value.
 
 \begin{table}
   \centering
@@ -189,14 +211,7 @@ To determine the accuracy, cost and efficiency of both methods, we apply them to
   \label{tab:part2_walltimes}
 \end{table}
 
-\begin{figure}[h!]
-\centering
-%Uncomment line below to display figure saved as fig2.png
-%\includegraphics[width=0.8\textwidth]{fig2.png}
 
-\caption{Add figure description here}
-\label{fig2}
-\end{figure}
 
 %Add additional figure if needed
 %---------------- End Part 2 -------------------
@@ -210,11 +225,11 @@ To determine the accuracy, cost and efficiency of both methods, we apply them to
 
 \subsubsection*{2.}
 %Place your brief discussion for question 2 here}
-The 4 lines of code in function \textit{part3q2} apply principal component analysis to the solution matrix $\mathbf{A}$, then return a lower dimensional approximate reconstruction of $\mathbf{A}$, along with the error of the reconstruction. 
+The 4 lines of code in function \textit{part3q2} apply principal component analysis to the solution matrix $\mathbf{A}$, then return a lower $x$-dimensional approximate reconstruction of $\mathbf{A}$, along with the error of the reconstruction. 
 \begin{enumerate}
     \item The first line retrieves the principal components of $\mathbf{A}$ efficiently by finding $\mathbf{v_1}$, the eigenvectors of the covariance matrix $\mathbf{A}^\top\mathbf{A}$, using \textit{np.linalg.eigh}. Calculating the covariance matrix and its eigenvalues is computationally faster than the SVD algorithms we use in \textit{part1} for PCA, however, it is more memory-intensive and can be numerically unstable.
     \item The second line calculates $\mathbf{v_2}$, the transformed data matrix, by transforming $\mathbf{A}$ into the space spanned by the principal components using matrix multiplication.
-    \item The third line uses the first $x$ columns of the transformed data matrix, along with the first $x$ principal components, to reconstruct the $x$-dimensional approximation of $A$. This again uses matrix multiplication
+    \item The third line uses the first $x$ columns of the transformed data matrix, along with the first $x$ principal components, to reconstruct the rank-$x$ approximation of $A$. This again uses matrix multiplication
     \item The last line calculates the square error of the reconstruction efficiently using \textit{NumPy} vectorised operations.
 \end{enumerate}   
 
