@@ -163,7 +163,7 @@ We run both methods on the following functions:
     
 \end{itemize}
 
-To determine the accuracy, cost and efficiency of both methods, we apply them to each function and plot the errors as the absolute difference between the interpolated value and the actual value. We also measure the average wall times (over 1000 runs) and calculate the RMSE (Root Mean Square Error). 
+To determine the accuracy, cost and efficiency of both methods, we first apply them to each function and plot the errors as the absolute difference between the interpolated value and the actual value. We also measure the average wall times (over 1000 runs) and calculate the mean error (mean absolute difference between interpolated and calculated values). We test the function on a grid with sizes $n=50$ and $m=40$.
 
 \FloatBarrier
 
@@ -183,21 +183,23 @@ To determine the accuracy, cost and efficiency of both methods, we apply them to
 
 From figures \ref{fig_osc} and \ref{fig_franke}, we observe that method 1 produces large errors at the peaks and troughs of both functions. Method 2 has a much more stable error value throughout both functions, except at the boundaries, where there is a significantly larger error value.
 
-\begin{table}
+\begin{table}[h!]
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
-     & RMSE Method 1 & RMSE Method 2 \\
+     & Error Method 1 & Error Method 2 \\
     \hline
     Oscillating function & 2.5761873814328875e-06 & 1.8641643487025784e-11 \\
     Franke's function & 4.884560478922877e-07 & 9.545519469236035e-12 \\
     \hline
   \end{tabular}
-  \caption{RMSE}
-  \label{tab:part2_RMSE}
+  \caption{Mean Error}
+  \label{tab:part2_err}
 \end{table}
 
-\begin{table}
+From Table \ref{tab:part2_err}, we note that method 2 has a significantly lower error for both functions, hence it is more accurate overall despite the higher error on the boundaries.
+
+\begin{table}[h!]
   \centering
   \begin{tabular}{|c|c|c|}
     \hline
@@ -211,7 +213,27 @@ From figures \ref{fig_osc} and \ref{fig_franke}, we observe that method 1 produc
   \label{tab:part2_walltimes}
 \end{table}
 
+From Table \ref{tab:part2_walltimes}, we see that method 2 has significantly longer wall times, as the method has a higher computational cost due to the use of matrix multiplication and solving linear equations, in comparison to the simpler method 1.
 
+
+
+\FloatBarrier
+
+We then test both methods on Franke's function for a range of different grid sizes (always letting $n=m+10$ for consistency).
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_yerror.png}
+\caption{Mean Error against y}
+\label{fig_yerror}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{fig_franke.png}
+\caption{Results for Franke's function}
+\label{fig_franke}
+\end{figure}
 
 %Add additional figure if needed
 %---------------- End Part 2 -------------------
