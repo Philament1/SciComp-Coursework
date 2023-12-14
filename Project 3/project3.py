@@ -343,11 +343,11 @@ def part2_analyze():
 
         #   Finding error
         error1 = abs(fI1-fI)
-        MSE1 = np.mean(error1**2)
-        print(f'MSE1: {MSE1}')
+        mean_error1 = np.mean(error1)
+        print(f'error1: {mean_error1}')
         error2 = abs(fI2-fI)
-        MSE2 = np.mean(error2**2)
-        print(f'MSE2: {MSE2}')
+        mean_error2 = np.mean(error2)
+        print(f'error2: {mean_error2}')
 
         #   Accuracy and error plots
         fig, ax = plt.subplots(1, 3)
@@ -364,13 +364,75 @@ def part2_analyze():
         ax[2].set_title('Method 2 interpolation error')
 
         plt.tight_layout()
-        plt.show()
 
     testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y))  # test with oscillating function
     testing_and_plots(lambda x, y: (3/4) * np.exp(-((9*x-2)**2)/4 - ((9*y-2)**2)/4) + \
                                (3/4) * np.exp(-((9*x+1)**2)/49 - ((9*y+1)**2)/10) + \
                                (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
                                (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2)))  # test with Franke's function
+    
+    #   Testing with different grid sizes
+
+    fig, ax = plt.subplots(1, 2)
+    m_list = np.arange(40, 240, 40, dtype='int')  # change as required
+    error_list1 = []
+    error_list2 = []
+    for m in m_list:
+        #----- Code for generating grid, use/modify/discard as needed ----#
+        n = m + 10
+        x = np.linspace(0,1,n)
+        y = np.linspace(0,1,m)
+        xg,yg = np.meshgrid(x,y)
+        dy = y[1]-y[0]
+        yI = y[:-1]+dy/2 #grid for interpolated data
+        #--------------------------------------------# 
+        xIg, yIg = np.meshgrid(x, yI)
+
+        func = lambda x, y: (3/4) * np.exp(-((9*x-2)**2)/4 - ((9*y-2)**2)/4) + \
+                               (3/4) * np.exp(-((9*x+1)**2)/49 - ((9*y+1)**2)/10) + \
+                               (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
+                               (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2))
+        
+        f = func(xg, yg)
+        fI = func(xIg, yIg)
+        
+        fI1 = part2(f, method=1)
+        fI2 = part2(f, method=2)
+
+        error1 = abs(fI1-fI)
+        error1 = np.mean(error1, axis=1)
+        error2 = abs(fI2-fI)
+        error2 = np.mean(error2, axis=1)
+        error_list1.append(np.mean(error1))
+        error_list2.append(np.mean(error2))
+
+        ax[0].semilogy(yI, error1, label=f'm={m}')
+        ax[0].set_ylim(10**-13, 10**-2)
+        ax[0].set_xlabel('y')
+        ax[0].set_ylabel('error')
+        ax[0].set_title('Method 1')
+        ax[0].grid(True)
+        ax[1].semilogy(yI, error2, label=f'm={m}')
+        ax[1].set_ylim(10**-13, 10**-2)
+        ax[1].set_xlabel('y')
+        ax[1].set_ylabel('error')
+        ax[1].set_title('Method 2')
+        ax[1].grid(True)
+
+    fig.legend(loc='upper center')
+    plt.tight_layout()
+    
+    plt.figure()
+    plt.semilogy(m_list, error_list1, label='Method 1')
+    plt.semilogy(m_list, error_list2, label='Method 2')
+    plt.xlabel('m')
+    plt.ylabel('error')
+    plt.title('Mean error against grid size')
+    plt.grid()
+    plt.legend()
+
+    plt.show()
+
 
     return None #modify as needed
 
@@ -574,6 +636,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    part1(time_as_datapoints=False)
-    # part2_analyze()
+    # part1(time_as_datapoints=False)
+    part2_analyze()
     # part3_analyze()
