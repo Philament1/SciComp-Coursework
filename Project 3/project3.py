@@ -419,7 +419,7 @@ def part2_analyze():
         ax[1].set_title('Method 2')
         ax[1].grid(True)
 
-    fig.legend(loc='upper center')
+    fig.legend(loc='lower left')
     plt.tight_layout()
     
     plt.figure()
