@@ -427,7 +427,6 @@ def part2_analyze():
     plt.semilogy(m_list, error_list2, label='Method 2')
     plt.xlabel('m')
     plt.ylabel('error')
-    plt.title('Mean error against grid size')
     plt.grid()
     plt.legend()
 
