@@ -411,15 +411,15 @@ def part2_analyze():
         ax[0].set_xlabel('y')
         ax[0].set_ylabel('error')
         ax[0].set_title('Method 1')
+        ax[0].legend(loc='lower left')
         ax[0].grid(True)
-        ax[1].semilogy(yI, error2, label=f'm={m}')
+        ax[1].semilogy(yI, error2)
         ax[1].set_ylim(10**-13, 10**-2)
         ax[1].set_xlabel('y')
         ax[1].set_ylabel('error')
         ax[1].set_title('Method 2')
         ax[1].grid(True)
 
-    fig.legend(loc='lower left')
     plt.tight_layout()
     
     plt.figure()
