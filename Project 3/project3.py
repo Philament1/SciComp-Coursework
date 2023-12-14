@@ -52,6 +52,30 @@ def plot_field2(lat,lon,u, time_points,levels=20):
 
     fig.colorbar(contour, ax=ax, orientation='vertical')
 
+def PCA(A, k=0):
+    """
+    Apply principal component analysis to A using SVD
+
+    Input:
+    A: p x N row-centered matrix, where p is number of features/attributes, N is number of data points
+    k: number of principal components (default=0 uses rank of A)
+    Output:
+    PC: k x p matrix, each row is a principal component
+    S: length k array, singular values
+    Atilde: k x N matrix, transformed data
+    """
+    U, S, WT = np.linalg.svd(A, full_matrices=False)  # Find singular values and principal components using SVD
+    rank = S[S>1e-11].size  # Find rank of A by checking number of non-zero singular values
+    print(f'rank A: {rank}')  
+
+    if k == 0:  # If k is not specified, we use the rank of A
+        k = rank
+
+    PC = U[:, :k].T  # Principal components
+
+    Atilde = PC @ A  # Transformed data
+    return S[:k], PC, Atilde
+
 def part1(time_as_datapoints = True):#add input if needed
     """
     Code for part 1
@@ -68,30 +92,6 @@ def part1(time_as_datapoints = True):#add input if needed
     plot_field2(lat, lon, u, np.linspace(0, 364, 5, dtype=int))
 
     L, M, N = u.shape # L = 365, M = 16, N = 144
-
-    def PCA(A, k=0):
-        """
-        Apply principal component analysis to A using SVD
-
-        Input:
-        A: p x N row-centered matrix, where p is number of features/attributes, N is number of data points
-        k: number of principal components (default=0 uses rank of A)
-        Output:
-        PC: k x p matrix, each row is a principal component
-        S: length k array, singular values
-        Atilde: k x N matrix, transformed data
-        """
-        U, S, WT = np.linalg.svd(A, full_matrices=False)  # Find singular values and principal components using SVD
-        rank = S[S>1e-11].size  # Find rank of A by checking number of non-zero singular values
-        print(f'rank A: {rank}')  
-
-        if k == 0:  # If k is not specified, we use the rank of A
-            k = rank
-
-        PC = U[:, :k].T  # Principal components
-
-        Atilde = PC @ A  # Transformed data
-        return S[:k], PC, Atilde
     
     if time_as_datapoints:
         '''CASE 1: TIME AS DATA POINTS'''
@@ -155,18 +155,10 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.ylabel('Value at day t+1')
         plt.legend()
 
-        #  Correlation between 30 days
-        plt.figure()
-        plt.scatter(Atilde[0][:-30], Atilde[0][30:], marker='x', label='Projection along PC1')
-        plt.scatter(Atilde[1][:-30], Atilde[1][30:], label='Projection along PC2')
-        plt.xlabel('Value at day t')
-        plt.ylabel('Value at day t+30')
-        plt.legend()
-
 
         #   Fourier on temporal trends
         plt.figure()
-        mode = np.arange(-L//2, L//2)
+        #  mode = np.arange(-L//2, L//2)
 
         window = np.hanning(len(Atilde[0]))
         Atilde_windowed = Atilde[0] * window
@@ -215,20 +207,39 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.ylabel('% explained variance')
         plt.xlabel('Principal Component')
 
-        #   Principal components (along time)  # Note they are negative
+        #   Principal components (along time)
         plt.figure()
         plt.plot(PC[0], label = 'PC1')
         plt.plot(PC[1], label = 'PC2')
         plt.xlabel('Day')
         plt.legend()
 
+        #   Fourier on PCs
+        plt.figure()
+        mode = np.arange(-L//2, L//2)
+
+        window = np.hanning(len(PC[0]))
+        PC_windowed = PC[0] * window
+
+        spect1 = abs(fft.fftshift(fft.fft(PC_windowed)))
+        freq = fft.fftshift(fft.fftfreq(L))
+        plt.semilogy(freq[L//2:], spect1[L//2:], label='FFT')
+
+        # plt.figure()
+        freq, welch1 = scipy.signal.welch(PC[0])
+        plt.semilogy(freq, welch1, label='Welch')
+        plt.xlabel('f')
+        plt.ylabel('spectral density')
+        #  plt.ylim(1, 10**6)
+        plt.legend()
+
         #   Spatial patterns (plotting rows of Atilde)
         # plot_field2(lat, lon, Atilde.reshape((L, M, N)), np.arange(0,3))
 
-        fig, ax = plt.subplots(3, 1)
+        fig, ax = plt.subplots(2, 1)
         cmap = plt.cm.get_cmap('viridis')
         
-        for i in range(3):
+        for i in range(2):
             contour = ax[i].contourf(lon, lat, Atilde.reshape((L, M, N))[i,:,:], 20)
             ax[i].set_aspect('equal')
             ax[i].grid()
@@ -274,12 +285,12 @@ def part2(f,method=2):
 
         #add code here
 
-        #  LHS matrix diagonal ordered form
+        #  LHS matrix in diagonal ordered form
         AB = np.vstack([np.full(m-1, alpha), np.ones(m-1), np.full(m-1, alpha)])
         AB[0, 0] = AB[0, 1] = 0
         AB[-1, -1] = AB[-1, -2] = 0
 
-        #  RHS banded matrix
+        #  RHS rectangular banded matrix
         diag0 = [a_bc]+[a/2]*(m-3)+[b_bc]
         diag1 = [b/2]*(m-3)+[c_bc]
         diag2 = [0]*(m-4)+[d_bc]
@@ -563,6 +574,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    part1(time_as_datapoints=True)
+    part1(time_as_datapoints=False)
     # part2_analyze()
     # part3_analyze()
