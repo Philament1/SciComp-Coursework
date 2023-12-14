@@ -257,16 +257,18 @@ def part2(f,method=2):
 
         #add code here
 
+        #  LHS matrix diagonal ordered form
         AB = np.vstack([np.full(m-1, alpha), np.ones(m-1), np.full(m-1, alpha)])
         AB[0, 0] = AB[0, 1] = 0
         AB[-1, -1] = AB[-1, -2] = 0
 
+        #  RHS banded matrix
         diag0 = [a_bc]+[a/2]*(m-3)+[b_bc]
         diag1 = [b/2]*(m-3)+[c_bc]
         diag2 = [0]*(m-4)+[d_bc]
         B = sp.diags([diag2, diag1, diag0, diag0[::-1], diag1[::-1], diag2[::-1]], [-2, -1,0,1,2, 3], shape=(m-1,m)).toarray()
 
-        fI = scipy.linalg.solve_banded((1,1), AB, B @ f)
+        fI = scipy.linalg.solve_banded((1,1), AB, B @ f)  # Solving linear equations
 
     return fI #modify as needed
 
@@ -286,9 +288,11 @@ def part2_analyze():
 
     #add code here
 
+    #   Meshgrid for interpolated values
     xIg, yIg = np.meshgrid(x, yI)
 
     def testing_and_plots(func):
+        #   Applying function to meshgrids
         f = func(xg, yg)
         fI = func(xIg, yIg)
 
@@ -309,7 +313,7 @@ def part2_analyze():
         print(f'Time1: {t1}')
         print(f'Time2: {t2}')
 
-        #   Accuracy and error plots
+        #   Finding error
         error1 = abs(fI1-fI)
         MSE1 = np.mean(error1**2)
         print(f'MSE1: {MSE1}')
@@ -317,30 +321,29 @@ def part2_analyze():
         MSE2 = np.mean(error2**2)
         print(f'MSE2: {MSE2}')
 
+        #   Accuracy and error plots
         fig, ax = plt.subplots(1, 3)
         im0 = ax[0].pcolormesh(xg, yg, f)
         fig.colorbar(im0)
-        ax[0].set_aspect('equal')
+        ax[0].set_title('Function')
 
         im1 = ax[1].pcolormesh(xIg, yIg, error1)
-        #ax[2].pcolormesh(xIg, yIg, error2, vmin=im1.get_clim()[0], vmax=im1.get_clim()[1])
-        #fig.colorbar(im1, ax=[ax[1], ax[2]])
-
         fig.colorbar(im1)
+        ax[1].set_title('Method 1 interpolation error')
+
         im2 = ax[2].pcolormesh(xIg, yIg, error2)
         fig.colorbar(im2)
+        ax[2].set_title('Method 2 interpolation error')
 
+        plt.tight_layout()
         plt.show()
 
-
-    # testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y))
-    # testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y) + np.where(y < 0.5, 0, 0.5))
+    testing_and_plots(lambda x, y: np.sin(2*np.pi*x) * np.cos(2*np.pi*y))  # test with oscillating function
     testing_and_plots(lambda x, y: (3/4) * np.exp(-((9*x-2)**2)/4 - ((9*y-2)**2)/4) + \
                                (3/4) * np.exp(-((9*x+1)**2)/49 - ((9*y+1)**2)/10) + \
                                (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
-                               (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2)))
-    testing_and_plots(lambda x, y: (1-x)**2 + 100*(y-x**2)**2)
-    
+                               (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2)))  # test with Franke's function
+
     return None #modify as needed
 
 
@@ -417,15 +420,24 @@ def part3_analyze(display = False):#add/remove input variables if needed
     y0[:n]=1+0.2*np.cos(4*k*a0)+0.3*np.sin(7*k*a0)+0.1*A0.real
 
     #---Example code for computing solution, use/modify/discard as needed---#
-    c = 1.3
-    t,y = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
-    y0 = y[-1,:]
-    t,y = part3q1(y0,alpha,beta,b,c,method='RK45',err=1e-6)
-    u,v = y[:,:n],y[:,n:]
-
-    if display:
-        plt.figure()
-        plt.contourf(np.arange(n),t,u,20)
+    c_vals = np.array([0.5, 1.2, 1.3, 1.5])
+    u_list = []
+    for c in c_vals:
+        if c == 1.3:
+            t,y = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
+            y0_ = y[-1,:]
+            t,y = part3q1(y0_,alpha,beta,b,c,method='RK45',err=1e-6)
+            u,v = y[:,:n],y[:,n:]
+            u_list.append(u)
+        else:
+            t1,y1 = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
+            y01 = y1[-1,:]
+            t1,y1 = part3q1(y01,alpha,beta,b,c,method='RK45',err=1e-6)
+            u1,v1 = y1[:,:n],y1[:,n:]
+            u_list.append(u1)
+        if display:
+            plt.figure()
+            plt.contourf(np.arange(n),t,u,20)
 
 
     #-------------------------------------------#
@@ -456,18 +468,30 @@ def part3_analyze(display = False):#add/remove input variables if needed
     plt.figure()
     plt.semilogy(f, Sf[:, 0])
 
-    #  Corr dimension
+    #  Correlation dimension
+    def corr_dim(u, c, logeps_min, logeps_max):
+        D = scipy.spatial.distance.pdist(u[:,100:-99])
+        eps = np.logspace(logeps_min-1, logeps_max+1, 30)
+        C = np.array([D[D < ep].size*2/(m*(m-1)) for ep in eps])
 
-    D = scipy.spatial.distance.pdist(x)
-    eps = np.logspace(-1, 2, 20)
-    C = [D[D < ep].size*2/(n*(n-1)) for ep in eps]
+        plt.figure()
+        plt.loglog(eps, C, marker = 'x', label=r'C($\epsilon$)')
+        
+        eps_fit = np.logspace(logeps_min, logeps_max, 20)
+        C_fit = np.array([D[D < ep].size*2/(n*(n-1)) for ep in eps_fit])
+        d, p_corr = np.polyfit(np.log(eps_fit), np.log(C_fit), 1)
+        print(d)
 
-    d, p_corr = np.polyfit(np.log(eps), np.log(C), 1)
-    print(d)
+        plt.loglog(eps, np.exp(p_corr)*(eps**d), linestyle='--', label=f'least squares fit, slope={d}')
+        plt.title(f'c = {c}')
+        plt.legend()
+        
+    c_num = len(c_vals)
+    logeps_min_vals = [-1, -1, -0.5, 0.5]
+    logeps_max_vals = [2, 2, 2, 1.8]
 
-    plt.figure()
-    plt.loglog(eps, C, marker = 'x')
-    plt.loglog(eps, np.exp(p_corr)*d*eps, linestyle='--')
+    for i in range(c_num):
+        corr_dim(u_list[i], c_vals[i], logeps_min_vals[i], logeps_max_vals[i])
 
     #  Oscillation mapping
     
@@ -522,6 +546,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    part1(time_as_datapoints=False)
-    # part2_analyze()
+    # part1(time_as_datapoints=False)
+    part2_analyze()
     # part3_analyze()
