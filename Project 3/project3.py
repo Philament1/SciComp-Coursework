@@ -155,16 +155,33 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.ylabel('Value at day t+1')
         plt.legend()
 
+        #  Correlation between 30 days
+        plt.figure()
+        plt.scatter(Atilde[0][:-30], Atilde[0][30:], marker='x', label='Projection along PC1')
+        plt.scatter(Atilde[1][:-30], Atilde[1][30:], label='Projection along PC2')
+        plt.xlabel('Value at day t')
+        plt.ylabel('Value at day t+30')
+        plt.legend()
+
+
         #   Fourier on temporal trends
         plt.figure()
         mode = np.arange(-L//2, L//2)
-        spect1 = abs(fft.fftshift(fft.fft(Atilde[0])))
+
+        window = np.hanning(len(Atilde[0]))
+        Atilde_windowed = Atilde[0] * window
+
+        spect1 = abs(fft.fftshift(fft.fft(Atilde_windowed)))
         freq = fft.fftshift(fft.fftfreq(L))
-        plt.semilogy(freq[L//2:], spect1[L//2:])
+        plt.semilogy(freq[L//2:], spect1[L//2:], label='FFT')
 
         # plt.figure()
         freq, welch1 = scipy.signal.welch(Atilde[0])
-        plt.semilogy(freq, welch1)
+        plt.semilogy(freq, welch1, label='Welch')
+        plt.xlabel('f')
+        plt.ylabel('spectral density')
+        plt.ylim(1, 10**6)
+        plt.legend()
 
         # # PC2 vs PC1
         # plt.figure()
@@ -546,6 +563,6 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    # part1(time_as_datapoints=False)
-    part2_analyze()
+    part1(time_as_datapoints=True)
+    # part2_analyze()
     # part3_analyze()
