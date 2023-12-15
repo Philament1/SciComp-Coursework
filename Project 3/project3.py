@@ -10,48 +10,6 @@ from scipy import sparse as sp
 from scipy import fft
 import time
 
-#===== Code for Part 1=====#
-
-def plot_field(lat,lon,u,time,levels=20):
-    """
-    Generate contour plot of u at particular time
-    Use if/as needed
-    Input:
-    lat,lon: latitude and longitude arrays
-    u: full array of wind speed data
-    time: time at which wind speed will be plotted (index between 0 and 364)
-    levels: number of contour levels in plot
-    """
-    # plt.figure()
-    # plt.contourf(lon,lat,u[time,:,:],levels)
-    # plt.axis('equal')
-    # plt.grid()
-    # plt.xlabel('longitude')
-    # plt.ylabel('latitude')
-
-    plt.figure()
-    contour = plt.contourf(lon,lat,u[time,:,:],levels)
-    plt.axis('equal')
-    plt.grid()
-    plt.xlabel('longitude')
-    plt.ylabel('latitude')
-    plt.colorbar(contour)
-
-    return None
-
-def plot_field2(lat,lon,u, time_points,levels=20):
-    fig, ax = plt.subplots(len(time_points), 1)
-    cmap = plt.cm.get_cmap('viridis')
-    
-    for i, t in enumerate(time_points):
-        contour = ax[i].contourf(lon, lat, u[t,:,:], levels)
-        ax[i].set_aspect('equal')
-        ax[i].grid()
-        ax[i].set_xlabel('longitude')
-        ax[i].set_ylabel('latitude')
-
-    fig.colorbar(contour, ax=ax, orientation='vertical')
-
 def PCA(A, k=0):
     """
     Apply principal component analysis to A using SVD
@@ -76,6 +34,41 @@ def PCA(A, k=0):
     Atilde = PC @ A  # Transformed data
     return S[:k], PC, Atilde
 
+#===== Code for Part 1=====#
+
+def plot_field(lat,lon,u,time,levels=20):
+    """
+    Generate contour plot of u at particular time
+    Use if/as needed
+    Input:
+    lat,lon: latitude and longitude arrays
+    u: full array of wind speed data
+    time: time at which wind speed will be plotted (index between 0 and 364)
+    levels: number of contour levels in plot
+    """
+
+    plt.figure()
+    contour = plt.contourf(lon,lat,u[time,:,:],levels)
+    plt.axis('equal')
+    plt.grid()
+    plt.xlabel('longitude')
+    plt.ylabel('latitude')
+
+    return None
+
+def plot_field2(lat,lon,u, time_points,levels=20):
+    fig, ax = plt.subplots(len(time_points), 1)
+    cmap = plt.cm.get_cmap('viridis')
+    
+    for i, t in enumerate(time_points):
+        contour = ax[i].contourf(lon, lat, u[t,:,:], levels)
+        ax[i].set_aspect('equal')
+        ax[i].grid()
+        ax[i].set_xlabel('longitude')
+        ax[i].set_ylabel('latitude')
+
+    fig.colorbar(contour, ax=ax, orientation='vertical')
+
 def part1(time_as_datapoints = True):#add input if needed
     """
     Code for part 1
@@ -89,7 +82,14 @@ def part1(time_as_datapoints = True):#add input if needed
     #Add code here 
 
     #   PLOTS
-    plot_field2(lat, lon, u, np.linspace(0, 364, 5, dtype=int))
+    fig, ax = plt.subplots(5, 1)
+    for i, t in enumerate(np.linspace(0, 364, 5, dtype=int)):
+        contour = ax[i].contourf(lon, lat, u[t,:,:], 20)
+        ax[i].set_aspect('equal')
+        ax[i].grid()
+        ax[i].set_xlabel('longitude')
+        ax[i].set_ylabel('latitude')
+    fig.colorbar(contour, ax=ax, orientation='vertical')
 
     L, M, N = u.shape # L = 365, M = 16, N = 144
     
@@ -136,8 +136,6 @@ def part1(time_as_datapoints = True):#add input if needed
             ax[i].set_xlabel('longitude')
             ax[i].set_ylabel('latitude')
         fig.colorbar(contour, ax=ax, orientation='vertical')
-
-        # plot_field(lat, lon, PC.reshape((k, M, N)), 0)
 
         #   Temporal trends (plotting rows of Atilde)
         plt.figure()
@@ -234,7 +232,6 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.legend()
 
         #   Spatial patterns (plotting rows of Atilde)
-        # plot_field2(lat, lon, Atilde.reshape((L, M, N)), np.arange(0,3))
 
         fig, ax = plt.subplots(2, 1)
         cmap = plt.cm.get_cmap('viridis')
@@ -374,7 +371,7 @@ def part2_analyze():
     #   Testing with different grid sizes
 
     fig, ax = plt.subplots(1, 2)
-    m_list = np.arange(40, 240, 40, dtype='int')  # change as required
+    m_list = np.arange(40, 1000, 40, dtype='int')  # change as required
     error_list1 = []
     error_list2 = []
     for m in m_list:
@@ -392,8 +389,6 @@ def part2_analyze():
                                (3/4) * np.exp(-((9*x+1)**2)/49 - ((9*y+1)**2)/10) + \
                                (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
                                (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2))
-        
-        func = lambda x, y: np.sin(y)
         
         f = func(xg, yg)
         fI = func(xIg, yIg)
@@ -567,7 +562,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
         eps_fit = np.logspace(logeps_min, logeps_max, 20)
         C_fit = np.array([D[D < ep].size*2/(n*(n-1)) for ep in eps_fit])
         d, p_corr = np.polyfit(np.log(eps_fit), np.log(C_fit), 1)
-        print(d)
 
         plt.loglog(eps, np.exp(p_corr)*(eps**d), linestyle='--', label=f'least squares fit, slope={d}')
         plt.title(f'c = {c}')
@@ -604,7 +598,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
         plt.ylabel(r'$P_{xx}$')
         plt.grid()
         f = fxx[Pxx==Pxx.max()][0]
-        print("c=",c)
         print("f=",f)
         print("dt,1/f=",t[1]-t[0],1/f)
 
@@ -670,6 +663,7 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
+    # part1()
     # part1(time_as_datapoints=False)
-    # part2_analyze()
-    part3_analyze()
+    part2_analyze()
+    # part3_analyze()
