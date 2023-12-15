@@ -520,22 +520,21 @@ def part3_analyze(display = False):#add/remove input variables if needed
         u,v = y[:,:n],y[:,n:]
         u_list.append(u)
 
+    if display:
+        for k, u_ in enumerate(u_list):
+            plt.figure()
+            plt.contourf(np.arange(n),t,u_,20)
+            plt.title(f'c={c_vals[k]}')
+            plt.xlabel('i')
+            plt.ylabel('t')
+        #-------------------------------------------#
+
+    #Add code here
+
     x_list = [u_[:,100:-99] for u_ in u_list]
     x = x_list[2]  # Further analysis on c=1.3
     Nt_1, m = x.shape
     # times = np.linspace(0, tf, Nt_1)
-
-    if display:
-        for k, u_ in enumerate(u_list):
-            plt.figure()
-            plt.contourf(np.arange(100, n-99),t,x_,20)
-            plt.title(f'c={c_vals[k]}')
-            plt.xlabel('i')
-            plt.ylabel('t')
-
-    #-------------------------------------------#
-
-    #Add code here
 
     #  Time plot
     for k, x_ in enumerate(x_list):
@@ -558,7 +557,7 @@ def part3_analyze(display = False):#add/remove input variables if needed
 
     #  Correlation dimension
     def corr_dim(u, c, logeps_min, logeps_max):
-        D = scipy.spatial.distance.pdist(u[:,100:-99])
+        D = scipy.spatial.distance.pdist(u)
         eps = np.logspace(logeps_min-1, logeps_max+1, 30)
         C = np.array([D[D < ep].size*2/(m*(m-1)) for ep in eps])
 
