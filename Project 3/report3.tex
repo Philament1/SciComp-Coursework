@@ -248,9 +248,9 @@ In Figure \ref{fig_merror}, we test for higher $m$ values. The error for increas
 %Place your discussion for question 1 here}
 For this question, we perform analysis on $c=0.5, 1.2, 1.3, 1.5$, and we let $x_i=u_{i-100}$ for $i = 100$ to $n-100$. 
 
-\begin{figure}
+\begin{figure}[h!]
   \centering
-
+  
   \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\linewidth]{fig_contour05.png}
   \end{subfigure}
@@ -269,7 +269,39 @@ For this question, we perform analysis on $c=0.5, 1.2, 1.3, 1.5$, and we let $x_
     \includegraphics[width=\linewidth]{fig_contour15.png}
   \end{subfigure}
 
-  \caption{Overall caption for the 2x2 figure.}
+  \caption{Contour plots with time against $i$}
+  \label{fig:overall}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\linewidth]{fig_pattern13.png}
+    \caption{Caption}
+    \label{fig_pattern13}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{fig_corr05.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{fig_corr12.png}
+  \end{subfigure}
+
+  \medskip
+
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{fig_corr13.png}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{fig_corr15.png}
+  \end{subfigure}
+
+  \caption{Correlation dimension plots}
   \label{fig:overall}
 \end{figure}
 
@@ -283,15 +315,6 @@ The 4 lines of code in function \textit{part3q2} apply principal component analy
     \item The third line uses the first $x$ columns of the transformed data matrix, along with the first $x$ principal components, to reconstruct the rank-$x$ approximation of $A$. This again uses matrix multiplication
     \item The last line calculates the square error of the reconstruction efficiently using \textit{NumPy} vectorised operations.
 \end{enumerate}   
-
-\begin{figure}[h!]
-\centering
-%Uncomment line below to display figure saved as fig3.png
-%\includegraphics[width=0.8\textwidth]{fig3.png}
-
-\caption{Add figure description here}
-\label{fig3}
-\end{figure}
 
 %---------------- End Part 3 -------------------
 %Add additional figures as needed
