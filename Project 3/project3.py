@@ -48,7 +48,7 @@ def plot_field(lat,lon,u,time,levels=20):
     """
 
     plt.figure()
-    contour = plt.contourf(lon,lat,u[time,:,:],levels)
+    plt.contourf(lon,lat,u[time,:,:],levels)
     plt.axis('equal')
     plt.grid()
     plt.xlabel('longitude')
@@ -81,7 +81,7 @@ def part1(time_as_datapoints = True):#add input if needed
 
     #Add code here 
 
-    #   PLOTS
+    #   Data plots
     fig, ax = plt.subplots(5, 1)
     for i, t in enumerate(np.linspace(0, 364, 5, dtype=int)):
         contour = ax[i].contourf(lon, lat, u[t,:,:], 20)
@@ -102,12 +102,6 @@ def part1(time_as_datapoints = True):#add input if needed
         k = L
         S, PC, Atilde = PCA(A, k)
 
-        # #   Reconstruction
-        # A_red = PC.T @ Atilde     #   A_red ((M x N) x L) reconstruction of A
-        # A_red += A_bar[:, None]
-        # utilde = A_red.T.reshape(L, M, N)
-        # plot_field2(lat, lon, utilde, np.linspace(0, 364, 5, dtype=int))
-
         #   Singular values
         plt.figure()
         plt.title('Singular values')
@@ -126,7 +120,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.xlabel('Principal Component')
         plt.legend()
 
-        # Principal components (along space)
+        #   Principal components (along space)
         fig, ax = plt.subplots(3, 1)
         for i in range(3):
             contour = ax[i].contourf(lon, lat, PC.reshape((k, M, N))[i,:,:], 20)
@@ -145,7 +139,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.ylabel('Projection along PC')
         plt.legend()
 
-        #  Correlation between subsequent days
+        #   Correlation between subsequent days
         plt.figure()
         plt.scatter(Atilde[0][:-1], Atilde[0][1:], marker='x', label='Projection along PC1')
         plt.scatter(Atilde[1][:-1], Atilde[1][1:], label='Projection along PC2')
@@ -154,7 +148,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.legend()
 
 
-        #   Fourier on temporal trends
+        #   Fourier and Welch on temporal trends
         plt.figure()
         #  mode = np.arange(-L//2, L//2)
 
@@ -165,17 +159,12 @@ def part1(time_as_datapoints = True):#add input if needed
         freq = fft.fftshift(fft.fftfreq(L))
         plt.semilogy(freq[L//2:], spect1[L//2:], label='FFT')
 
-        # plt.figure()
         freq, welch1 = scipy.signal.welch(Atilde[0])
         plt.semilogy(freq, welch1, label='Welch')
         plt.xlabel('f')
         plt.ylabel('spectral density')
         plt.ylim(1, 10**6)
         plt.legend()
-
-        # # PC2 vs PC1
-        # plt.figure()
-        # plt.scatter(Atilde[0], Atilde[1])
 
         plt.show()
     
@@ -212,27 +201,7 @@ def part1(time_as_datapoints = True):#add input if needed
         plt.xlabel('Day')
         plt.legend()
 
-        #   Fourier on PCs
-        plt.figure()
-        mode = np.arange(-L//2, L//2)
-
-        window = np.hanning(len(PC[0]))
-        PC_windowed = PC[0] * window
-
-        spect1 = abs(fft.fftshift(fft.fft(PC_windowed)))
-        freq = fft.fftshift(fft.fftfreq(L))
-        plt.semilogy(freq[L//2:], spect1[L//2:], label='FFT')
-
-        # plt.figure()
-        freq, welch1 = scipy.signal.welch(PC[0])
-        plt.semilogy(freq, welch1, label='Welch')
-        plt.xlabel('f')
-        plt.ylabel('spectral density')
-        #  plt.ylim(1, 10**6)
-        plt.legend()
-
         #   Spatial patterns (plotting rows of Atilde)
-
         fig, ax = plt.subplots(2, 1)
         cmap = plt.cm.get_cmap('viridis')
         
@@ -244,10 +213,6 @@ def part1(time_as_datapoints = True):#add input if needed
             ax[i].set_xlabel('longitude')
             ax[i].set_ylabel('latitude')
         fig.colorbar(contour, ax=ax, orientation='vertical')
-
-        # #   PC1 vs PC2
-        # plt.figure()
-        # plt.scatter(Atilde[0], Atilde[1])
 
         plt.show()
 
@@ -396,12 +361,16 @@ def part2_analyze():
         fI1 = part2(f, method=1)
         fI2 = part2(f, method=2)
 
+        #  Error calculation
+
         error1 = abs(fI1-fI)
         error1 = np.mean(error1, axis=1)
         error2 = abs(fI2-fI)
         error2 = np.mean(error2, axis=1)
         error_list1.append(np.mean(error1))
         error_list2.append(np.mean(error2))
+
+        #  Error plots for each method
 
         ax[0].semilogy(yI, error1, label=f'm={m}')
         ax[0].set_ylim(10**-13, 10**-2)
@@ -418,7 +387,8 @@ def part2_analyze():
         ax[1].grid(True)
 
     plt.tight_layout()
-    
+
+    #  Overall mean error plot
     plt.figure()
     plt.semilogy(m_list, error_list1, label='Method 1')
     plt.semilogy(m_list, error_list2, label='Method 2')
@@ -529,7 +499,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
     x_list = [u_[:,100:-99] for u_ in u_list]
     x = x_list[2]  # Further analysis on c=1.3
     Nt_1, m = x.shape
-    # times = np.linspace(0, tf, Nt_1)
 
     #  Time plot
     for k, x_ in enumerate(x_list):
@@ -539,16 +508,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
         plt.title(f'c={c_vals[k]}')
         plt.xlabel('time')
         plt.ylabel('u(t)')
-
-    # #  FFT analysis
-
-    # Sf = np.fft.fftshift(np.fft.fft(x, axis=0))
-    # f = np.fft.fftshift(np.fft.fftfreq(Nt_1, t[1]-t[0]))
-
-    # plt.figure()
-    # plt.plot(f, Sf[:, 0])
-    # plt.figure()
-    # plt.semilogy(f, Sf[:, 0])
 
     #  Correlation dimension
     def corr_dim(u, c, logeps_min, logeps_max):
@@ -573,15 +532,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
 
     for i in range(c_num):
         corr_dim(x_list[i], c_vals[i], logeps_min_vals[i], logeps_max_vals[i])
-
-    # #  Oscillation mapping
-    
-    # dx = np.diff(x[:,0])
-    # d2x  = dx[:-1]*dx[1:]
-    # ind = np.argwhere(d2x<0)
-    
-    # plt.figure()
-    # plt.plot(x[:,0])
 
     #  PCA analysis
 
@@ -663,7 +613,7 @@ if __name__=='__main__':
     x=None #Included so file can be imported
     #Add code here to call functions above if needed
 
-    # part1()
-    # part1(time_as_datapoints=False)
+    part1()
+    part1(time_as_datapoints=False)
     part2_analyze()
-    # part3_analyze()
+    part3_analyze()
