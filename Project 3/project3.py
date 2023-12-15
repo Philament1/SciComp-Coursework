@@ -393,6 +393,8 @@ def part2_analyze():
                                (1/2) * np.exp(-((9*x-7)**2)/4 - ((9*y-3)**2)/4) - \
                                (1/5) * np.exp(-((9*x-4)**2) - ((9*y-7)**2))
         
+        func = lambda x, y: np.sin(y)
+        
         f = func(xg, yg)
         fI = func(xIg, yIg)
         
@@ -495,7 +497,7 @@ def part3_analyze(display = False):#add/remove input variables if needed
     beta = (25/np.pi)**2
     alpha = 1-2*beta
     b =-1.5
-    n = 1500 # default 4000
+    n = 4000 # default 4000
 
     tf = 200
     Nt = 800
@@ -512,28 +514,23 @@ def part3_analyze(display = False):#add/remove input variables if needed
     c_vals = np.array([0.5, 1.2, 1.3, 1.5])
     u_list = []
     for c in c_vals:
-        if c == 1.3:
-            t,y = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
-            y0_ = y[-1,:]
-            t,y = part3q1(y0_,alpha,beta,b,c,method='RK45',err=1e-6)
-            u,v = y[:,:n],y[:,n:]
-            u_list.append(u)
-        else:
-            t1,y1 = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
-            y01 = y1[-1,:]
-            t1,y1 = part3q1(y01,alpha,beta,b,c,method='RK45',err=1e-6)
-            u1,v1 = y1[:,:n],y1[:,n:]
-            u_list.append(u1)
-        if display:
+        t,y = part3q1(y0,alpha,beta,b,c,tf=20,Nt=2,method='RK45') #for transient, modify tf and other parameters as needed
+        y0_ = y[-1,:]
+        t,y = part3q1(y0_,alpha,beta,b,c,method='RK45',err=1e-6)
+        u,v = y[:,:n],y[:,n:]
+        u_list.append(u)
+
+    if display:
+        for u_ in u_list:
             plt.figure()
-            plt.contourf(np.arange(n),t,u,20)
-
-
+            plt.contourf(np.arange(n),t,u_,20)
+    
     #-------------------------------------------#
 
     #Add code here
 
-    x = u[:,100:-99]
+    x_list = [u_[:,100:-99] for u_ in u_list]
+    x = x_list[2]  # Further analysis on c=1.3
     Nt_1, m = x.shape
     times = np.linspace(0, tf, Nt_1)
 
@@ -541,21 +538,18 @@ def part3_analyze(display = False):#add/remove input variables if needed
     plt.figure()
     for i in range(m):
         plt.plot(t, x[:,i])
+    plt.xlabel('time')
+    plt.ylabel('u(t)')
 
-    #  Space plot
-    plt.figure()
-    for j in range(Nt_1):
-        plt.plot(np.arange(100, n-99), x[j])
+    # #  FFT analysis
 
-    #  FFT analysis
+    # Sf = np.fft.fftshift(np.fft.fft(x, axis=0))
+    # f = np.fft.fftshift(np.fft.fftfreq(Nt_1, t[1]-t[0]))
 
-    Sf = np.fft.fftshift(np.fft.fft(x, axis=0))
-    f = np.fft.fftshift(np.fft.fftfreq(Nt_1, t[1]-t[0]))
-
-    plt.figure()
-    plt.plot(f, Sf[:, 0])
-    plt.figure()
-    plt.semilogy(f, Sf[:, 0])
+    # plt.figure()
+    # plt.plot(f, Sf[:, 0])
+    # plt.figure()
+    # plt.semilogy(f, Sf[:, 0])
 
     #  Correlation dimension
     def corr_dim(u, c, logeps_min, logeps_max):
@@ -580,17 +574,54 @@ def part3_analyze(display = False):#add/remove input variables if needed
     logeps_max_vals = [2, 2, 2, 1.8]
 
     for i in range(c_num):
-        corr_dim(u_list[i], c_vals[i], logeps_min_vals[i], logeps_max_vals[i])
+        corr_dim(x_list[i], c_vals[i], logeps_min_vals[i], logeps_max_vals[i])
 
-    #  Oscillation mapping
+    # #  Oscillation mapping
     
-    dx = np.diff(x[:,0])
-    d2x  = dx[:-1]*dx[1:]
-    ind = np.argwhere(d2x<0)
+    # dx = np.diff(x[:,0])
+    # d2x  = dx[:-1]*dx[1:]
+    # ind = np.argwhere(d2x<0)
     
-    plt.figure()
-    plt.plot(x[:,0])
+    # plt.figure()
+    # plt.plot(x[:,0])
 
+    #  PCA analysis
+
+    for i, x_ in enumerate(x_list):
+        S, PC, xtilde = PCA(x_.T-np.mean(x_.T, axis=1)[:, None])
+        xtilde = xtilde.T
+
+        #  Welch's method
+        dt = t[1]-t[0]
+        fxx,Pxx = scipy.signal.welch(x_[:,0],fs=1/dt)
+        plt.figure()
+        plt.semilogy(fxx,Pxx)
+        plt.xlabel(r'$f$')
+        plt.ylabel(r'$P_{xx}$')
+        plt.grid()
+        f = fxx[Pxx==Pxx.max()][0]
+        print("c=",c)
+        print("f=",f)
+        print("dt,1/f=",t[1]-t[0],1/f)
+
+        fig, ax = plt.subplots(1, 2, figsize=(8,5))
+
+        #  Phase plot of first two principal component transformations
+        ax[0].plot(xtilde[:,0], xtilde[:,1])
+        ax[0].set_xlabel(r'$\tilde{x}_0$')
+        ax[0].set_ylabel(r'$\tilde{x}_1$')
+        ax[0].set_title('Phase plot')
+        
+        #  Transition map plot with time delays
+        tau = 1/(5*f)
+        Del = int(tau/dt)
+        ax[1].plot(xtilde[:-Del,0], xtilde[Del:,0])
+        ax[1].set_xlabel(r'$\tilde{x}_0(t)$')
+        ax[1].set_ylabel(r'$\tilde{x}_0(t+\tau)$')
+        ax[1].set_title('Transition map')
+        
+        plt.suptitle(f'c={c_vals[i]}')
+        plt.tight_layout()
 
     plt.show()
 
@@ -636,5 +667,5 @@ if __name__=='__main__':
     #Add code here to call functions above if needed
 
     # part1(time_as_datapoints=False)
-    part2_analyze()
-    # part3_analyze()
+    # part2_analyze()
+    part3_analyze()
