@@ -56,19 +56,6 @@ def plot_field(lat,lon,u,time,levels=20):
 
     return None
 
-def plot_field2(lat,lon,u, time_points,levels=20):
-    fig, ax = plt.subplots(len(time_points), 1)
-    cmap = plt.cm.get_cmap('viridis')
-    
-    for i, t in enumerate(time_points):
-        contour = ax[i].contourf(lon, lat, u[t,:,:], levels)
-        ax[i].set_aspect('equal')
-        ax[i].grid()
-        ax[i].set_xlabel('longitude')
-        ax[i].set_ylabel('latitude')
-
-    fig.colorbar(contour, ax=ax, orientation='vertical')
-
 def part1(time_as_datapoints = True):#add input if needed
     """
     Code for part 1
