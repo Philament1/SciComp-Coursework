@@ -449,10 +449,7 @@ def part3_analyze(display = False):#add/remove input variables if needed
     beta = (25/np.pi)**2
     alpha = 1-2*beta
     b =-1.5
-    n = 4000 # default 4000
-
-    tf = 200
-    Nt = 800
+    n = 4000
 
     #Set initial conidition
     L = (n-1)/np.sqrt(beta)
@@ -603,4 +600,4 @@ if __name__=='__main__':
     part1()
     part1(time_as_datapoints=False)
     part2_analyze()
-    part3_analyze()
+    part3_analyze(True)
