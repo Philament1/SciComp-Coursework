@@ -484,15 +484,6 @@ def part3_analyze(display = False):#add/remove input variables if needed
     x = x_list[2]  # Further analysis on c=1.3
     Nt_1, m = x.shape
 
-    #  Time plot
-    for k, x_ in enumerate(x_list):
-        plt.figure()
-        for i in range(m):
-            plt.plot(t, x_[:,i])
-        plt.title(f'c={c_vals[k]}')
-        plt.xlabel('time')
-        plt.ylabel('u(t)')
-
     #  Correlation dimension
     def corr_dim(u, c, logeps_min, logeps_max):
         D = scipy.spatial.distance.pdist(u)
