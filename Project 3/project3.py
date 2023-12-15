@@ -1,5 +1,5 @@
 """Scientific Computation Project 3
-Your CID here
+02027072
 """
 import numpy as np
 import matplotlib.pyplot as plt
