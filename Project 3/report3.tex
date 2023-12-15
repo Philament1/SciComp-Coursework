@@ -54,7 +54,7 @@ Figure \ref{fig_pc1} shows the first 3 principal components, i.e. the directions
 
 From Figure \ref{fig_var1}, we observe that 80\% of the total variance is retained at around 20 principal components and that under 20\% of the total variance is captured by the first PC. 
 
-Figure \ref{fig_proj1} shows our transformed data values as projections onto the first 2 principal components. 
+Figure \ref{fig_proj1} shows our transformed data values as projections onto the first 2 principal components. There are no clear patterns in this so we do further analysis on this time series. 
 
 \begin{figure}[h!]
     \begin{minipage}{0.49\textwidth}
@@ -72,7 +72,7 @@ Figure \ref{fig_proj1} shows our transformed data values as projections onto the
     \end{minipage}%
 \end{figure}
 
-From Figure \ref{fig_proj1b}, we observe there are no dominant frequencies in both spectral density estimates, suggesting there are no consistent periodic patterns in wind speed over the year. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
+From Figure \ref{fig_proj1b}, we observe there are none of the frequencies significantly dominate the others in both spectral density estimates, suggesting there are no consistent periodic patterns in wind speed over the year. The frequency density also appears to decrease as frequency increases, indicating that trends appear to be gradual and seasonal, and there are fewer high-frequency variations, such as rapid changes in windspeed. 
 
 We see from Figure \ref{fig_proj1c} that there is a general positive correlation in wind speed between subsequent days, supporting our idea that there are few high-frequency variations. 
 
@@ -103,11 +103,11 @@ From Figure \ref{fig_var2}, we observe that 80\% of the total variance is retain
 \begin{figure}[h!]
 \centering
 \includegraphics[width=\textwidth]{fig_proj2.png}
-\caption{Projected values of first 3 principal components}
+\caption{Projected values of first 2 principal components}
 \label{fig_proj2}
 \end{figure}
 
-From Figure \ref{fig_proj2}, we see a large variation in scores between the higher and lower latitudes, indicating great differences in windspeeds between the upper and lower halves of the map. The second and third principal components also show distinct zones where the scores are similar, indicating the presence of spatial clusters and patterns. 
+From Figure \ref{fig_proj2}, we see a large variation in scores between the higher and lower latitudes, indicating great differences in windspeed between the upper and lower halves of the map. The second principal component also shows distinct zones where the scores are similar, indicating the presence of spatial clusters and patterns. 
 
 %---------------- End Part 1 -------------------
 
@@ -221,16 +221,16 @@ We then test both methods on Franke's function for a range of different grid siz
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=\textwidth]{fig_yerror.png}
+\includegraphics[width=0.7\textwidth]{fig_yerror.png}
 \caption{Mean Error for each $y$}
 \label{fig_yerror}
 \end{figure}
 
-In Figure \ref{fig_yerror}, we test $m=40, 80, \cdots, 160, 200$. We observe that the error is more consistent for different $y$ with method 1, whereas method 2 is significantly worse at the boundaries. Both methods are more accurate at higher $m$ values, and method 2 is consistently more accurate than method 1.
+In Figure \ref{fig_yerror}, we test $m=40, 80, \dots, 160, 200$. We observe that the error is more consistent for different $y$ with method 1, whereas method 2 is significantly worse at the boundaries. Both methods are more accurate at higher $m$ values, and method 2 is consistently more accurate than method 1.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=\textwidth]{fig_merror.png}
+\includegraphics[width=0.7\textwidth]{fig_merror.png}
 \caption{Mean Error against $m$}
 \label{fig_merror}
 \end{figure}
@@ -245,6 +245,40 @@ In Figure \ref{fig_merror}, we test for higher $m$ values. The error for increas
 
 \subsubsection*{1.}
 %Place your discussion for question 1 here}
+For this question, we perform analysis on $c=0.5, 1.2, 1.3, 1.5$, and we let $x_i=u_{i-100}$ for $i = 100$ to $n-100$. 
+
+\begin{figure}
+  \centering
+
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{image1.png}
+    \caption{Caption for Image 1}
+    \label{fig:sub1}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{image2.png}
+    \caption{Caption for Image 2}
+    \label{fig:sub2}
+  \end{subfigure}
+
+  \medskip
+
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{image3.png}
+    \caption{Caption for Image 3}
+    \label{fig:sub3}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\linewidth]{image4.png}
+    \caption{Caption for Image 4}
+    \label{fig:sub4}
+  \end{subfigure}
+
+  \caption{Overall caption for the 2x2 figure.}
+  \label{fig:overall}
+\end{figure}
 
 
 \subsubsection*{2.}
